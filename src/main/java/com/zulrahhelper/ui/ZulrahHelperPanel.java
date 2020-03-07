@@ -18,8 +18,6 @@ import java.util.List;
 @Slf4j
 @Singleton
 public class ZulrahHelperPanel extends PluginPanel {
-    private final PluginListPanel pluginListPanel;
-
     private final ZulrahHelperPlugin plugin;
     private final JPanel phasesView = new JPanel(new GridBagLayout());
 

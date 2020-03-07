@@ -86,7 +86,8 @@ public class ZulrahHelperPlugin extends Plugin {
 
         List<Phase> choices = tree.get(tree.size()-1);
         if (choice >= choices.size()) {
-            log.warn("trying to select nonexistent phase: %d %d", choice, choices.size());
+            log.error("trying to select nonexistent phase: {} {}", choice, choices.size());
+            return;
         }
 
         setState(choices.get(choice));
