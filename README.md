@@ -16,9 +16,9 @@ The config allows to set hotkeys to help advance through rotation selection.
 Screenshots
 -----------
 
-![magma1](/assets/magma1.png "magma1")
-![magma2](/assets/magma2.png "magma2")
-![tanz1](/assets/tanz1.png "tanz1")
+![magma](/assets/magma.png "magma")
+![start](/assets/start.png "start")
+![tanz](/assets/tanz.png "tanz")
 
 License
 -------
