@@ -56,12 +56,11 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
-        plugin.setState(phase);
     }
 
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
-
+        plugin.setState(phase);
     }
 
     @Override
