@@ -7,22 +7,27 @@ import net.runelite.client.util.ImageUtil;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.function.Predicate;
 
 public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
 
     private final ZulrahHelperPlugin plugin;
     private final Phase phase;
+    private final JLabel picLabel;
+    private final ImageIcon phaseIcon;
+    private final ImageIcon phaseIconHover;
 
     ZulrahHelperPhasePanel(ZulrahHelperPlugin plugin, Phase phase, int rows) {
         this.plugin = plugin;
         this.phase = phase;
 
-        JLabel picLabel = new JLabel(new ImageIcon(processImg(phase.getImage(), rows)));
+        BufferedImage img = processImg(phase.getImage(), rows);
+        phaseIcon = new ImageIcon(img);
+        phaseIconHover = new ImageIcon(ImageUtil.luminanceScale(img, .75f));
+
+        picLabel = new JLabel(phaseIcon);
         if (phase.isSelectable()) {
             picLabel.addMouseListener(this);
         }
@@ -66,10 +71,11 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseEntered(MouseEvent mouseEvent) {
+        picLabel.setIcon(phaseIconHover);
     }
 
     @Override
     public void mouseExited(MouseEvent mouseEvent) {
-
+        picLabel.setIcon(phaseIcon);
     }
 }
