@@ -3,7 +3,6 @@ package com.zulrahhelper;
 import com.google.inject.Provides;
 import com.zulrahhelper.ui.ZulrahHelperPanel;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
@@ -14,7 +13,6 @@ import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
-import java.awt.image.BufferedImage;
 import java.util.List;
 
 @Slf4j
@@ -25,42 +23,42 @@ import java.util.List;
 )
 public class ZulrahHelperPlugin extends Plugin {
     @Inject
-    private Client client;
-
-
-    @Inject
     private KeyManager keyManager;
 
     @Inject
     private ClientToolbar clientToolbar;
 
-
     @Inject
     private ZulrahHelperConfig config;
 
     private ZulrahHelperPanel panel;
+    private NavigationButton navButton;
+
     private State state;
 
-    HotkeyListener resetPhasesHotkey;
-    HotkeyListener nextPhaseHotkey;
-    HotkeyListener[] phaseSelectionHotKeys = new HotkeyListener[3];
+    private HotkeyListener resetPhasesHotkey;
+    private HotkeyListener nextPhaseHotkey;
+    private HotkeyListener[] phaseSelectionHotKeys = new HotkeyListener[3];
 
     @Override
     protected void startUp() throws Exception {
         panel = new ZulrahHelperPanel(this);
         state = new State();
-        clientToolbar.addNavigation(NavigationButton.builder()
+        navButton = NavigationButton.builder()
                 .tooltip("Zulrah Helper")
                 .icon(ImageUtil.getResourceStreamFromClass(getClass(), "/icon.png"))
                 .priority(70)
                 .panel(panel)
-                .build());
+                .build();
+
+        clientToolbar.addNavigation(navButton);
         initHotkeys();
         panel.update(state);
     }
 
     @Override
     protected void shutDown() throws Exception {
+        clientToolbar.removeNavigation(navButton);
         keyManager.unregisterKeyListener(resetPhasesHotkey);
         keyManager.unregisterKeyListener(nextPhaseHotkey);
         for (HotkeyListener phaseSelectionHotKey : phaseSelectionHotKeys) {
@@ -84,7 +82,7 @@ public class ZulrahHelperPlugin extends Plugin {
             return;
         }
 
-        List<Phase> choices = tree.get(tree.size()-1);
+        List<Phase> choices = tree.get(tree.size() - 1);
         if (choice >= choices.size()) {
             log.error("trying to select nonexistent phase: {} {}", choice, choices.size());
             return;
@@ -104,7 +102,7 @@ public class ZulrahHelperPlugin extends Plugin {
             @Override
             public void hotkeyPressed() {
                 Phase p = state.getPhase();
-                setState(new Phase(p.getRotation(), p.getNumber()+1));
+                setState(new Phase(p.getRotation(), p.getNumber() + 1));
             }
         };
 
