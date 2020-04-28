@@ -2,8 +2,11 @@ package com.zulrahhelper;
 
 import com.google.inject.Provides;
 import com.zulrahhelper.ui.ZulrahHelperPanel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -22,6 +25,9 @@ import java.util.List;
         tags = {"zulrah", "pvm"}
 )
 public class ZulrahHelperPlugin extends Plugin {
+    static final String CONFIG_GROUP = "zulrahhelper";
+    static final String DARK_MODE_KEY = "darkMode";
+
     @Inject
     private KeyManager keyManager;
 
@@ -29,6 +35,7 @@ public class ZulrahHelperPlugin extends Plugin {
     private ClientToolbar clientToolbar;
 
     @Inject
+    @Getter
     private ZulrahHelperConfig config;
 
     private ZulrahHelperPanel panel;
@@ -63,6 +70,17 @@ public class ZulrahHelperPlugin extends Plugin {
         keyManager.unregisterKeyListener(nextPhaseHotkey);
         for (HotkeyListener phaseSelectionHotKey : phaseSelectionHotKeys) {
             keyManager.unregisterKeyListener(phaseSelectionHotKey);
+        }
+    }
+
+    @Subscribe
+    public void onConfigChanged(ConfigChanged event) {
+        if (!event.getGroup().equals(CONFIG_GROUP)) {
+            return;
+        }
+
+        if (event.getKey().equals(DARK_MODE_KEY)) {
+            panel.update(state);
         }
     }
 

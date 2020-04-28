@@ -10,19 +10,30 @@ public class Phase {
         START, NORMAL, MAGMA, MAGMA_A, MAGMA_B, TANZ
     }
 
-    public static final String IMG_PATH = "/phases/%s-%s.png";
+    public static final String IMG_PATH = "/phases/%s-%s%s.png";
 
     private final Rotation rotation;
     private final int number;
-    private final BufferedImage image;
+    private BufferedImage image;
     private boolean current = false;
     private boolean selectable = false;
     private boolean completed = false;
+    private String lastImgPath;
 
     public Phase(Rotation rotation, int number) {
         this.rotation = rotation;
         this.number = number;
-        this.image = ImageUtil.getResourceStreamFromClass(getClass(), String.format(IMG_PATH, rotation.name().toLowerCase(), number));
+        this.lastImgPath = getImgPath(rotation, number, false);
+        this.image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
+    }
+
+    private String getImgPath(Rotation rotation, int number, boolean darkMode) {
+        String dark = "";
+        if (darkMode) {
+            dark = "-dark";
+        }
+
+        return String.format(IMG_PATH, rotation.name().toLowerCase(), number, dark);
     }
 
     public Rotation getRotation() {
@@ -63,8 +74,14 @@ public class Phase {
         setCompleted(state);
     }
 
-    public BufferedImage getImage() {
+    public BufferedImage getImage(ZulrahHelperConfig config) {
+        String currentImgPath = getImgPath(getRotation(), getNumber(), config.darkMode());
+        if (currentImgPath.equals(lastImgPath)) {
+            return image;
+        }
+
+        lastImgPath = currentImgPath;
+        image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
         return image;
     }
 }
-

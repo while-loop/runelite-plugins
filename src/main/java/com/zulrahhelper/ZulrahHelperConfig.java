@@ -5,25 +5,35 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Keybind;
 
-@ConfigGroup("zulrahhelper")
+@ConfigGroup(ZulrahHelperPlugin.CONFIG_GROUP)
 public interface ZulrahHelperConfig extends Config {
     @ConfigItem(
-            keyName = "nextPhaseHotkey",
-            name = "Next Phase",
-            description = "Increment the phase number by 1",
-            position = 2
+            keyName = ZulrahHelperPlugin.DARK_MODE_KEY,
+            name = "Dark Mode",
+            description = "Set phases phase images to dark mode",
+            position = 1
     )
-    default Keybind nextPhaseHotkey() {
-        return Keybind.NOT_SET;
+    default boolean darkMode() {
+        return true;
     }
 
     @ConfigItem(
             keyName = "resetPhasesHotkey",
             name = "Reset Phases",
             description = "Set phases back to start",
-            position = 1
+            position = 2
     )
     default Keybind resetPhasesHotkey() {
+        return Keybind.NOT_SET;
+    }
+
+    @ConfigItem(
+            keyName = "nextPhaseHotkey",
+            name = "Next Phase",
+            description = "Increment the phase number by 1",
+            position = 3
+    )
+    default Keybind nextPhaseHotkey() {
         return Keybind.NOT_SET;
     }
 
@@ -31,7 +41,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "phaseSelection1Hotkey",
             name = "Phase Selection 1",
             description = "Choose the first option in phase selection",
-            position = 3
+            position = 4
     )
     default Keybind phaseSelection1Hotkey() {
         return Keybind.NOT_SET;
@@ -41,7 +51,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "phaseSelection2Hotkey",
             name = "Phase Selection 2",
             description = "Choose the second option in phase selection",
-            position = 4
+            position = 5
     )
     default Keybind phaseSelection2Hotkey() {
         return Keybind.NOT_SET;
@@ -51,7 +61,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "phaseSelection3Hotkey",
             name = "Phase Selection 3",
             description = "Choose the third option in phase selection",
-            position = 5
+            position = 6
     )
     default Keybind phaseSelection3Hotkey() {
         return Keybind.NOT_SET;

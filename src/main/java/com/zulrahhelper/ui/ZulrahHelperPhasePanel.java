@@ -23,7 +23,7 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
         this.plugin = plugin;
         this.phase = phase;
 
-        BufferedImage img = processImg(phase.getImage(), rows);
+        BufferedImage img = processImg(phase.getImage(plugin.getConfig()), rows);
         phaseIcon = new ImageIcon(img);
         phaseIconHover = new ImageIcon(ImageUtil.luminanceScale(img, .75f));
 
@@ -49,7 +49,7 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
         }
         img = ImageUtil.resizeImage(img, size, size);
         if (phase.isCompleted()) {
-            img = ImageUtil.luminanceScale(img, 0.50f);
+            img = ImageUtil.luminanceScale(img, 0.20f);
         }
         return img;
     }
