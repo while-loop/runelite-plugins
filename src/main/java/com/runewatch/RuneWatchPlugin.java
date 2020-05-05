@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -22,19 +23,26 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageCapture;
+import net.runelite.client.util.SwingUtil;
+import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.EnumUtils;
 
 import javax.inject.Inject;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static net.runelite.client.util.ImageUploadStyle.CLIPBOARD;
+import static net.runelite.client.util.ImageUploadStyle.NEITHER;
 
 @Slf4j
 @PluginDescriptor(
@@ -48,14 +56,29 @@ public class RuneWatchPlugin extends Plugin {
     private static final String INVESTIGATE = "Investigate";
     private static final String FOLDER_NAME = "Trades";
 
+    private static final String NBSP = Character.toString((char) 160);
+
     private static final String ACCEPTED_TRADE_MSG = "Accepted trade.";
     private static final String DECLINED_TRADE_MSG = "Other player declined trade.";
     private static final String DECLINE_MSG = "Decline";
 
-    private static final Pattern TRADING_WITH_PATTERN = Pattern.compile("Trading with:<br>(.*)");
+    private static final Pattern TRADING_WITH_PATTERN = Pattern.compile("Trading [W|w]ith:(<br>|\\s)(.*)");
 
-    private static final int TRADE_CONFIRMATION_GROUP_ID = 334;
-    private static final int TRADE_CONFIRMATION_TRADING_WITH_ID = 30;
+    private static final int PLAYER_TRADE_OFFER_GROUP_ID = 335;
+    private static final int PLAYER_TRADE_OFFER_TRADING_WITH = 31;
+    private static final int PLAYER_TRADE_OFFER_TRADE_MODIFIED_ME = 26;
+    private static final int PLAYER_TRADE_OFFER_TRADE_MODIFIED_THEM = 29;
+
+    private static final int PLAYER_TRADE_CONFIRMATION_GROUP_ID = 334;
+    private static final int PLAYER_TRADE_CONFIRMATION_TRADING_WITH = 30;
+    private static final int PLAYER_TRADE_CONFIRMATION_TRADE_MODIFIED_THEM = 31;
+
+    private static final int RAIDING_PARTY_RECRUITMENT_BOARD_GROUP_ID = 507;
+
+    private static final List<Integer> TRADE_SCREEN_GROUP_IDS = Arrays.asList(
+            PLAYER_TRADE_OFFER_GROUP_ID,
+            PLAYER_TRADE_CONFIRMATION_GROUP_ID
+    );
 
     private static final List<Integer> MENU_WIDGET_IDS = ImmutableList.of(
             WidgetInfo.FRIENDS_LIST.getGroupId(),
@@ -64,7 +87,7 @@ public class RuneWatchPlugin extends Plugin {
             WidgetInfo.RAIDING_PARTY.getGroupId(),
             WidgetInfo.PRIVATE_CHAT_MESSAGE.getGroupId(),
             WidgetInfo.IGNORE_LIST.getGroupId(),
-            507 // RAIDING_RECRUITING_BOARD
+            RAIDING_PARTY_RECRUITMENT_BOARD_GROUP_ID
     );
 
     private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(
@@ -163,28 +186,28 @@ public class RuneWatchPlugin extends Plugin {
         }
 
         String rsn = event.getMenuTarget();
-        RuneWatchCase rwCase = getUserCase(rsn);
-        ChatMessageBuilder response = new ChatMessageBuilder()
-                .append(ChatColorType.HIGHLIGHT)
-                .append(rsn)
-                .append(ChatColorType.NORMAL);
+        showPlayerWarning(rsn, true, false);
+    }
 
-        if (rwCase == null) {
-            response = response.append(" is not on RuneWatch's list.");
-        } else {
-            response = response
-                    .append(" is on RuneWatch's list for ")
-                    .append(ChatColorType.HIGHLIGHT)
-                    .append(rwCase.getType() + " " + rwCase.niceValue() + " ")
-                    .append(ChatColorType.NORMAL)
-                    .append("on " + rwCase.niceDate())
-                    .append(".");
+    @Subscribe
+    public void onGameTick(GameTick event) {
+        for (int gid : TRADE_SCREEN_GROUP_IDS) {
+            Widget w = client.getWidget(gid, 0);
+            if (w != null) {
+                showTradeWarning(gid);
+            }
+        }
+    }
+
+    @Subscribe
+    public void onClanMemberJoined(ClanMemberJoined event) {
+        String rsn = Text.toJagexName(event.getMember().getName());
+        String local = client.getLocalPlayer().getName();
+        if (rsn.equals(local)){
+            return;
         }
 
-        chatMessageManager.queue(QueuedMessage.builder()
-                .type(ChatMessageType.CONSOLE)
-                .runeLiteFormattedMessage(response.build())
-                .build());
+        showPlayerWarning(rsn, false, true);
     }
 
     @Subscribe
@@ -192,7 +215,7 @@ public class RuneWatchPlugin extends Plugin {
         int groupId = WidgetInfo.TO_GROUP(event.getWidgetId());
         String option = event.getMenuOption();
 
-        if (groupId != TRADE_CONFIRMATION_GROUP_ID) {
+        if (!TRADE_SCREEN_GROUP_IDS.contains(groupId)) {
             return;
         }
 
@@ -203,11 +226,10 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onWidgetLoaded(final WidgetLoaded event) {
-        if (event.getGroupId() != TRADE_CONFIRMATION_GROUP_ID) {
-            return;
+        int groupId = event.getGroupId();
+        if (groupId == PLAYER_TRADE_CONFIRMATION_GROUP_ID) {
+            takeScreenshot();
         }
-
-        takeScreenshot();
     }
 
     @Subscribe
@@ -233,12 +255,12 @@ public class RuneWatchPlugin extends Plugin {
 
     private void takeScreenshot() {
         runeWatchOverlay.queueForTimestamp(image -> {
-            Widget nameWidget = client.getWidget(TRADE_CONFIRMATION_GROUP_ID, TRADE_CONFIRMATION_TRADING_WITH_ID);
+            Widget nameWidget = client.getWidget(PLAYER_TRADE_CONFIRMATION_GROUP_ID, PLAYER_TRADE_CONFIRMATION_TRADING_WITH);
             trader = "unknown";
             if (nameWidget != null) {
                 Matcher m = TRADING_WITH_PATTERN.matcher(nameWidget.getText());
                 if (m.matches()) {
-                    trader = m.group(1);
+                    trader = m.group(2);
                 }
             }
 
@@ -258,8 +280,53 @@ public class RuneWatchPlugin extends Plugin {
             int gameOffsetY = 0;
 
             graphics.drawImage(image, gameOffsetX, gameOffsetY, null);
-            imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, true, CLIPBOARD);
+            imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, true, NEITHER);
         });
+    }
+
+    private void showTradeWarning(int groupId) {
+        int tradeModifiedId = PLAYER_TRADE_CONFIRMATION_TRADE_MODIFIED_THEM;
+        int tradeModifiedMeId = PLAYER_TRADE_CONFIRMATION_TRADING_WITH;
+        int tradingWithId = PLAYER_TRADE_CONFIRMATION_TRADING_WITH;
+        if (groupId == PLAYER_TRADE_OFFER_GROUP_ID) {
+            tradeModifiedId = PLAYER_TRADE_OFFER_TRADE_MODIFIED_THEM;
+            tradingWithId = PLAYER_TRADE_OFFER_TRADING_WITH;
+            tradeModifiedMeId = PLAYER_TRADE_OFFER_TRADE_MODIFIED_ME;
+        }
+
+        Widget tradeModified = client.getWidget(groupId, tradeModifiedId);
+        Widget tradingWith = client.getWidget(groupId, tradingWithId);
+        Widget tradeModifiedMe = client.getWidget(groupId, tradeModifiedMeId);
+        if (tradingWith == null || tradeModified == null) {
+            log.warn("no trading with widget found");
+            return;
+        }
+
+        Matcher m = TRADING_WITH_PATTERN.matcher(tradingWith.getText());
+        if (!m.matches()) {
+            log.warn("no rsn found in trading with widget: " + tradingWith.getText());
+            return;
+        }
+        String trader = m.group(2);
+        RuneWatchCase rwCase = getUserCase(trader);
+        if (rwCase == null) {
+            return;
+        }
+
+        String wText = tradeModified.getText();
+        if (!wText.contains("WARNING")) {
+            String warningMsg = String.format("<br>WARNING: %s is on RuneWatch's list.", trader);
+            String msg = wText + warningMsg;
+            tradeModified.setText(msg);
+
+            // check if this is the first time we've offseted x/y
+            if (tradeModified.getOriginalY() == tradeModifiedMe.getOriginalY()) {
+                tradeModified.setOriginalY(tradeModified.getOriginalY() - 10);
+                tradeModified.setOriginalX(tradeModified.getOriginalX() - 20);
+            }
+            tradeModified.setHidden(false);
+            tradeModified.revalidate();
+        }
     }
 
     private void insertMenuEntry(MenuEntry newEntry, MenuEntry[] entries) {
@@ -269,11 +336,43 @@ public class RuneWatchPlugin extends Plugin {
         client.setMenuEntries(newMenu);
     }
 
-    private RuneWatchCase getUserCase(String rsn) {
-        Random rnd = new Random();
-        if (rnd.nextBoolean()) {
-            return null;
+    private void showPlayerWarning(String rsn, boolean notifyClear, boolean clan) {
+        rsn = Text.toJagexName(rsn);
+        RuneWatchCase rwCase = getUserCase(rsn);
+        ChatMessageBuilder response = new ChatMessageBuilder();
+        if (clan) {
+            response.append("Clan member, ");
         }
+        response.append(ChatColorType.HIGHLIGHT)
+                .append(rsn)
+                .append(ChatColorType.NORMAL);
+
+        if (rwCase == null && !notifyClear) {
+            return;
+        } else if (rwCase == null) {
+            response.append(" is not on RuneWatch's list.");
+        } else {
+            response
+                    .append(" is on RuneWatch's list for ")
+                    .append(ChatColorType.HIGHLIGHT)
+                    .append(rwCase.getType() + " " + rwCase.niceValue() + " ")
+                    .append(ChatColorType.NORMAL)
+                    .append("on " + rwCase.niceDate())
+                    .append(".");
+        }
+
+        chatMessageManager.queue(QueuedMessage.builder()
+                .type(ChatMessageType.CONSOLE)
+                .runeLiteFormattedMessage(response.build())
+                .build());
+    }
+
+    private RuneWatchCase getUserCase(String rsn) {
+        rsn = Text.toJagexName(rsn);
+        Random rnd = new Random();
+//        if (rnd.nextBoolean()) {
+//            return null;
+//        }
 
         return new RuneWatchCase(rsn, Calendar.getInstance(), Math.abs(rnd.nextInt()), "LOAN");
     }
