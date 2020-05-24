@@ -24,6 +24,19 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
         this.phase = phase;
 
         BufferedImage img = processImg(phase.getImage(plugin.getConfig()), rows);
+        switch (plugin.getConfig().imageOrientation())
+        {
+            case RIGHT:
+                img = ImageUtil.rotateImage(img, Math.PI / 2);
+                break;
+            case UPSIDE_DOWN:
+                img = ImageUtil.rotateImage(img, Math.PI);
+                break;
+            case LEFT:
+                img = ImageUtil.rotateImage(img, Math.PI * 1.5f);
+                break;
+        }
+
         phaseIcon = new ImageIcon(img);
         phaseIconHover = new ImageIcon(ImageUtil.luminanceScale(img, .75f));
 
