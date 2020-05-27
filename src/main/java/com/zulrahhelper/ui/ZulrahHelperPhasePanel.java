@@ -1,6 +1,7 @@
 package com.zulrahhelper.ui;
 
 import com.zulrahhelper.Phase;
+import com.zulrahhelper.ZulrahHelperConfig;
 import com.zulrahhelper.ZulrahHelperPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
@@ -51,6 +52,12 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
         if (phase.isCompleted()) {
             img = ImageUtil.luminanceScale(img, 0.20f);
         }
+
+        final double theta = plugin.getConfig().imageOrientation().getRotation();
+        if (theta != 0) {
+            img = ImageUtil.rotateImage(img, theta);
+        }
+
         return img;
     }
 

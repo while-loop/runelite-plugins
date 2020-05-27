@@ -27,6 +27,7 @@ import java.util.List;
 public class ZulrahHelperPlugin extends Plugin {
     static final String CONFIG_GROUP = "zulrahhelper";
     static final String DARK_MODE_KEY = "darkMode";
+    static final String IMAGE_ORIENTATION_KEY = "imageOrientation";
 
     @Inject
     private KeyManager keyManager;
@@ -79,7 +80,7 @@ public class ZulrahHelperPlugin extends Plugin {
             return;
         }
 
-        if (event.getKey().equals(DARK_MODE_KEY)) {
+        if (event.getKey().equals(DARK_MODE_KEY) || event.getKey().equals(IMAGE_ORIENTATION_KEY)) {
             panel.update(state);
         }
     }
