@@ -18,10 +18,20 @@ public interface ZulrahHelperConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = ZulrahHelperPlugin.AUTO_HIDE_KEY,
+            name = "Hide when outside of Zul-Andra",
+            description = "Don't show the button in the sidebar when you're not in Zul-Andra",
+            position = 2
+    )
+    default boolean autoHide() {
+        return true;
+    }
+
+    @ConfigItem(
             keyName = "resetPhasesHotkey",
             name = "Reset Phases",
             description = "Set phases back to start",
-            position = 2
+            position = 3
     )
     default Keybind resetPhasesHotkey() {
         return Keybind.NOT_SET;
@@ -31,7 +41,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "nextPhaseHotkey",
             name = "Next Phase",
             description = "Increment the phase number by 1",
-            position = 3
+            position = 4
     )
     default Keybind nextPhaseHotkey() {
         return Keybind.NOT_SET;
@@ -41,7 +51,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "phaseSelection1Hotkey",
             name = "Phase Selection 1",
             description = "Choose the first option in phase selection",
-            position = 4
+            position = 5
     )
     default Keybind phaseSelection1Hotkey() {
         return Keybind.NOT_SET;
@@ -51,7 +61,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "phaseSelection2Hotkey",
             name = "Phase Selection 2",
             description = "Choose the second option in phase selection",
-            position = 5
+            position = 6
     )
     default Keybind phaseSelection2Hotkey() {
         return Keybind.NOT_SET;
@@ -61,7 +71,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "phaseSelection3Hotkey",
             name = "Phase Selection 3",
             description = "Choose the third option in phase selection",
-            position = 6
+            position = 7
     )
     default Keybind phaseSelection3Hotkey() {
         return Keybind.NOT_SET;
@@ -71,7 +81,7 @@ public interface ZulrahHelperConfig extends Config {
             keyName = "imageOrientation",
             name = "Orientation",
             description = "Rotate the phase images to the specified cardinal direction.",
-            position = 7
+            position = 8
     )
     default ImageOrientation imageOrientation()
     {

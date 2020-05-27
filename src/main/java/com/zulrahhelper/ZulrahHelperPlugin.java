@@ -4,6 +4,10 @@ import com.google.inject.Provides;
 import com.zulrahhelper.ui.ZulrahHelperPanel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.api.Player;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -16,6 +20,8 @@ import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
+import javax.swing.*;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -28,12 +34,26 @@ public class ZulrahHelperPlugin extends Plugin {
     static final String CONFIG_GROUP = "zulrahhelper";
     static final String DARK_MODE_KEY = "darkMode";
     static final String IMAGE_ORIENTATION_KEY = "imageOrientation";
+    static final String AUTO_HIDE_KEY = "autoHide";
+
+    private static final int ZULANDRA_REGION_ID = 8751;
+    private static final int ZULRAH_SPAWN_REGION_ID = 9007;
+    private static final int ZULRAH_REGION_ID = 9008;
+
+    private static final List<Integer> REGION_IDS = Arrays.asList(
+            ZULANDRA_REGION_ID,
+            ZULRAH_SPAWN_REGION_ID,
+            ZULRAH_REGION_ID
+    );
 
     @Inject
     private KeyManager keyManager;
 
     @Inject
     private ClientToolbar clientToolbar;
+
+    @Inject
+    private Client client;
 
     @Inject
     @Getter
@@ -43,10 +63,11 @@ public class ZulrahHelperPlugin extends Plugin {
     private NavigationButton navButton;
 
     private State state;
+    private HotkeyListener[] hotkeys = new HotkeyListener[5];
 
-    private HotkeyListener resetPhasesHotkey;
-    private HotkeyListener nextPhaseHotkey;
-    private HotkeyListener[] phaseSelectionHotKeys = new HotkeyListener[3];
+    private int lastRegionId = -1;
+    private boolean hotkeysEnabled = false;
+    private boolean panelEnabled = false;
 
     @Override
     protected void startUp() throws Exception {
@@ -59,18 +80,16 @@ public class ZulrahHelperPlugin extends Plugin {
                 .panel(panel)
                 .build();
 
-        clientToolbar.addNavigation(navButton);
         initHotkeys();
+        togglePanel(!config.autoHide(), false);
         panel.update(state);
     }
 
     @Override
     protected void shutDown() throws Exception {
         clientToolbar.removeNavigation(navButton);
-        keyManager.unregisterKeyListener(resetPhasesHotkey);
-        keyManager.unregisterKeyListener(nextPhaseHotkey);
-        for (HotkeyListener phaseSelectionHotKey : phaseSelectionHotKeys) {
-            keyManager.unregisterKeyListener(phaseSelectionHotKey);
+        if (hotkeysEnabled) {
+            toggleHotkeys();
         }
     }
 
@@ -83,11 +102,60 @@ public class ZulrahHelperPlugin extends Plugin {
         if (event.getKey().equals(DARK_MODE_KEY) || event.getKey().equals(IMAGE_ORIENTATION_KEY)) {
             panel.update(state);
         }
+
+        if (event.getKey().equals(AUTO_HIDE_KEY)) {
+            boolean atZul = REGION_IDS.contains(getRegionId());
+            togglePanel(atZul || !config.autoHide(), false);
+        }
     }
 
     @Provides
     ZulrahHelperConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(ZulrahHelperConfig.class);
+    }
+
+    @Subscribe
+    public void onGameTick(GameTick tick) {
+        checkRegion();
+    }
+
+    private void checkRegion() {
+        final int regionId = getRegionId();
+
+        if (hotkeysEnabled && regionId != ZULRAH_REGION_ID) {
+            toggleHotkeys();
+        }
+
+        if (!REGION_IDS.contains(regionId)) {
+            if (config.autoHide()) {
+                togglePanel(false, false);
+            }
+
+            lastRegionId = regionId;
+            return;
+        }
+
+        // in a zulrah region
+        if (!REGION_IDS.contains(lastRegionId)) {
+            // just got to zulandra region, show panel
+            if (!panelEnabled && config.autoHide()) {
+                togglePanel(true, true);
+            }
+        }
+
+        if ((regionId == ZULRAH_REGION_ID || regionId == ZULRAH_SPAWN_REGION_ID) && !hotkeysEnabled) {
+            toggleHotkeys();
+        }
+        lastRegionId = regionId;
+    }
+
+    private int getRegionId() {
+        Player player = client.getLocalPlayer();
+        if (player == null) {
+            return -1;
+        }
+
+        return WorldPoint.fromLocalInstance(client, player.getLocalLocation()).getRegionID();
     }
 
     public void reset() {
@@ -117,7 +185,30 @@ public class ZulrahHelperPlugin extends Plugin {
     }
 
     private void initHotkeys() {
-        nextPhaseHotkey = new HotkeyListener(() -> config.nextPhaseHotkey()) {
+
+
+        hotkeys[0] = new HotkeyListener(() -> config.phaseSelection1Hotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                selectOption(0);
+            }
+        };
+
+        hotkeys[1] = new HotkeyListener(() -> config.phaseSelection2Hotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                selectOption(1);
+            }
+        };
+
+        hotkeys[2] = new HotkeyListener(() -> config.phaseSelection3Hotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                selectOption(2);
+            }
+        };
+
+        hotkeys[3] = new HotkeyListener(() -> config.nextPhaseHotkey()) {
             @Override
             public void hotkeyPressed() {
                 Phase p = state.getPhase();
@@ -125,38 +216,40 @@ public class ZulrahHelperPlugin extends Plugin {
             }
         };
 
-        resetPhasesHotkey = new HotkeyListener(() -> config.resetPhasesHotkey()) {
+        hotkeys[4] = new HotkeyListener(() -> config.resetPhasesHotkey()) {
             @Override
             public void hotkeyPressed() {
                 reset();
             }
         };
+    }
 
-        phaseSelectionHotKeys[0] = new HotkeyListener(() -> config.phaseSelection1Hotkey()) {
-            @Override
-            public void hotkeyPressed() {
-                selectOption(0);
+    private void toggleHotkeys() {
+        for (HotkeyListener hotkey : hotkeys) {
+            if (hotkeysEnabled) {
+                keyManager.unregisterKeyListener(hotkey);
+            } else {
+                keyManager.registerKeyListener(hotkey);
             }
-        };
+        }
+        hotkeysEnabled = !hotkeysEnabled;
+        reset();
+    }
 
-        phaseSelectionHotKeys[1] = new HotkeyListener(() -> config.phaseSelection2Hotkey()) {
-            @Override
-            public void hotkeyPressed() {
-                selectOption(1);
+    private void togglePanel(boolean enable, boolean show) {
+        panelEnabled = enable;
+        if (enable) {
+            clientToolbar.addNavigation(navButton);
+            if (show) {
+                SwingUtilities.invokeLater(() -> {
+                    if (!navButton.isSelected()) {
+                        navButton.getOnSelect().run();
+                    }
+                });
             }
-        };
-
-        phaseSelectionHotKeys[2] = new HotkeyListener(() -> config.phaseSelection3Hotkey()) {
-            @Override
-            public void hotkeyPressed() {
-                selectOption(2);
-            }
-        };
-
-        keyManager.registerKeyListener(nextPhaseHotkey);
-        keyManager.registerKeyListener(resetPhasesHotkey);
-        for (HotkeyListener phaseSelectionHotKey : phaseSelectionHotKeys) {
-            keyManager.registerKeyListener(phaseSelectionHotKey);
+        } else {
+            clientToolbar.removeNavigation(navButton);
+            navButton.setSelected(false);
         }
     }
 }
