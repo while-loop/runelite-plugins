@@ -46,6 +46,11 @@ public class ZulrahHelperPlugin extends Plugin {
             ZULRAH_REGION_ID
     );
 
+    private static final List<Integer> INSTANCE_IDS = Arrays.asList(
+            ZULRAH_SPAWN_REGION_ID,
+            ZULRAH_REGION_ID
+    );
+
     @Inject
     private KeyManager keyManager;
 
@@ -121,8 +126,7 @@ public class ZulrahHelperPlugin extends Plugin {
 
     private void checkRegion() {
         final int regionId = getRegionId();
-
-        if (hotkeysEnabled && regionId != ZULRAH_REGION_ID) {
+        if (hotkeysEnabled && !INSTANCE_IDS.contains(regionId)) {
             toggleHotkeys();
         }
 
@@ -143,7 +147,7 @@ public class ZulrahHelperPlugin extends Plugin {
             }
         }
 
-        if ((regionId == ZULRAH_REGION_ID || regionId == ZULRAH_SPAWN_REGION_ID) && !hotkeysEnabled) {
+        if (INSTANCE_IDS.contains(regionId) && !hotkeysEnabled) {
             toggleHotkeys();
         }
         lastRegionId = regionId;
@@ -233,7 +237,6 @@ public class ZulrahHelperPlugin extends Plugin {
             }
         }
         hotkeysEnabled = !hotkeysEnabled;
-        reset();
     }
 
     private void togglePanel(boolean enable, boolean show) {
