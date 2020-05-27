@@ -7,14 +7,6 @@ import net.runelite.client.config.Keybind;
 
 @ConfigGroup(ZulrahHelperPlugin.CONFIG_GROUP)
 public interface ZulrahHelperConfig extends Config {
-    enum ImageOrientation
-    {
-        DEFAULT,
-        RIGHT,
-        UPSIDE_DOWN,
-        LEFT
-    }
-
     @ConfigItem(
             keyName = ZulrahHelperPlugin.DARK_MODE_KEY,
             name = "Dark Mode",
@@ -78,11 +70,11 @@ public interface ZulrahHelperConfig extends Config {
     @ConfigItem(
             keyName = "imageOrientation",
             name = "Orientation",
-            description = "Rotate the phase images to the specified orientation.",
+            description = "Rotate the phase images to the specified cardinal direction.",
             position = 7
     )
     default ImageOrientation imageOrientation()
     {
-        return ImageOrientation.DEFAULT;
+        return ImageOrientation.SOUTH;
     }
 }
