@@ -1,0 +1,972 @@
+[
+  {
+    "skill": "ranged",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 250000,
+        "method": null
+      },
+      {
+        "level": 92,
+        "rate": 330000,
+        "method": null
+      },
+      {
+        "level": 99,
+        "rate": 925000,
+        "method": null
+      }
+    ]
+  },
+  {
+    "skill": "prayer",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 504000,
+        "method": "dragon bones chaos alter"
+      }
+    ]
+  },
+  {
+    "skill": "magic",
+    "methods": [
+      {
+        "level": 13,
+        "rate": 14000,
+        "method": "Splashing Fire Strike"
+      },
+      {
+        "level": 19,
+        "rate": 34000,
+        "method": "Splashing Curse"
+      },
+      {
+        "level": 43,
+        "rate": 97000,
+        "method": "Superheat Item"
+      },
+      {
+        "level": 70,
+        "rate": 200000,
+        "method": "Ice Burst @ Maniacal Monkey"
+      },
+      {
+        "level": 94,
+        "rate": 250000,
+        "method": "Ice Barrage @ Maniacal Monkey"
+      }
+    ]
+  },
+  {
+    "skill": "cooking",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 35000,
+        "method": "Shrimp"
+      },
+      {
+        "level": 15,
+        "rate": 85000,
+        "method": "Trout"
+      },
+      {
+        "level": 25,
+        "rate": 11000,
+        "method": "Salmon"
+      },
+      {
+        "level": 35,
+        "rate": 120000,
+        "method": "Tuna"
+      },
+      {
+        "level": 50,
+        "rate": 170000,
+        "method": "Lobster (Cooking Gauntlets & 100% Hosidius Favor)"
+      },
+      {
+        "level": 75,
+        "rate": 180000,
+        "method": "Swordfish"
+      },
+      {
+        "level": 80,
+        "rate": 235000,
+        "method": "Shark"
+      },
+      {
+        "level": 84,
+        "rate": 310000,
+        "method": "Anglerfish"
+      }
+    ]
+  },
+  {
+    "skill": "woodcutting",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 12000,
+        "method": "Regular trees"
+      },
+      {
+        "level": 15,
+        "rate": 25000,
+        "method": "Oak Trees"
+      },
+      {
+        "level": 30,
+        "rate": 27000,
+        "method": "Willow trees"
+      },
+      {
+        "level": 35,
+        "rate": 40000,
+        "method": "Teak trees"
+      },
+      {
+        "level": 61,
+        "rate": 60000,
+        "method": "Teak trees (Dragon axe)"
+      },
+      {
+        "level": 90,
+        "rate": 67500,
+        "method": "Redwood trees"
+      }
+    ]
+  },
+  {
+    "skill": "fletching",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 10000,
+        "method": "Arrow shafts"
+      },
+      {
+        "level": 10,
+        "rate": 17000,
+        "method": "Longbow (fletching)"
+      },
+      {
+        "level": 20,
+        "rate": 28050,
+        "method": "Oak showbow (fletching)"
+      },
+      {
+        "level": 25,
+        "rate": 61250,
+        "method": "Oak longbow (fletching)"
+      },
+      {
+        "level": 35,
+        "rate": 56525,
+        "method": "Willow shortbow (fletching)"
+      },
+      {
+        "level": 40,
+        "rate": 70550,
+        "method": "Willow longbow (fletching)"
+      },
+      {
+        "level": 50,
+        "rate": 85000,
+        "method": "Maple shortbow (fletching)"
+      },
+      {
+        "level": 55,
+        "rate": 99025,
+        "method": "Maple longbow (fletching)"
+      },
+      {
+        "level": 65,
+        "rate": 114750,
+        "method": "Yew shortbow (fletching)"
+      },
+      {
+        "level": 70,
+        "rate": 127500,
+        "method": "Yew longbow (fletching)"
+      },
+      {
+        "level": 85,
+        "rate": 155550,
+        "method": "Magic longbow (fletching)"
+      }
+    ]
+  },
+  {
+    "skill": "fishing",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 20000,
+        "method": "Questing (Sea Slug, Fishing Contest, Pirate Pete subquest for RFD)"
+      },
+      {
+        "level": 20,
+        "rate": 25000,
+        "method": "Fly fishing"
+      },
+      {
+        "level": 47,
+        "rate": 40000,
+        "method": "Drift net fishing (44 Hunter req'd)"
+      },
+      {
+        "level": 58,
+        "rate": 45000,
+        "method": "Barbarian Fishing"
+      },
+      {
+        "level": 70,
+        "rate": 58000,
+        "method": "Barbarian Fishing"
+      },
+      {
+        "level": 80,
+        "rate": 62000,
+        "method": "Barbarian Fishing"
+      },
+      {
+        "level": 90,
+        "rate": 66000,
+        "method": "Barbarian Fishing"
+      },
+      {
+        "level": 95,
+        "rate": 68000,
+        "method": "Barbarian Fishing"
+      }
+    ]
+  },
+  {
+    "skill": "firemaking",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 59400,
+        "method": "Logs"
+      },
+      {
+        "level": 15,
+        "rate": 89100,
+        "method": "Oak logs"
+      },
+      {
+        "level": 30,
+        "rate": 133650,
+        "method": "Willow logs"
+      },
+      {
+        "level": 35,
+        "rate": 155925,
+        "method": "Teak logs"
+      },
+      {
+        "level": 45,
+        "rate": 200475,
+        "method": "Maple logs"
+      },
+      {
+        "level": 50,
+        "rate": 161000,
+        "method": "Wintertodt"
+      },
+      {
+        "level": 60,
+        "rate": 193000,
+        "method": "Wintertodt"
+      },
+      {
+        "level": 70,
+        "rate": 226000,
+        "method": "Wintertodt"
+      },
+      {
+        "level": 80,
+        "rate": 258000,
+        "method": "Wintertodt"
+      },
+      {
+        "level": 90,
+        "rate": 290000,
+        "method": "Wintertodt"
+      },
+      {
+        "level": 99,
+        "rate": 320000,
+        "method": "Wintertodt"
+      }
+    ]
+  },
+  {
+    "skill": "crafting",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 26000,
+        "method": "Leather gloves"
+      },
+      {
+        "level": 7,
+        "rate": 30500,
+        "method": "Leather boots"
+      },
+      {
+        "level": 9,
+        "rate": 35000,
+        "method": "Leather cowl"
+      },
+      {
+        "level": 11,
+        "rate": 41500,
+        "method": "Leather vambraces"
+      },
+      {
+        "level": 14,
+        "rate": 47100,
+        "method": "Leather body"
+      },
+      {
+        "level": 18,
+        "rate": 50900,
+        "method": "Leather chaps"
+      },
+      {
+        "level": 20,
+        "rate": 135000,
+        "method": "Cutting Sapphire"
+      },
+      {
+        "level": 61,
+        "rate": 125000,
+        "method": "Casting Superglass Make"
+      },
+      {
+        "level": 66,
+        "rate": 336000,
+        "method": "Air battlestaff (optional)"
+      }
+    ]
+  },
+  {
+    "skill": "smithing",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 26000,
+        "method": "Leather gloves"
+      },
+      {
+        "level": 15,
+        "rate": 75000,
+        "method": "Blast furnace (Iron bar)"
+      },
+      {
+        "level": 30,
+        "rate": 35000,
+        "method": "Blast furnace (Steel bar)"
+      },
+      {
+        "level": 40,
+        "rate": 337200,
+        "method": "Blast furnace (Gold bar w/ Goldsmith gauntlets)"
+      },
+      {
+        "level": 99,
+        "rate": 350000,
+        "method": "Blast furnace (Gold bar w/ Goldsmith gauntlets & Smithing cape)"
+      }
+    ]
+  },
+  {
+    "skill": "mining",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 27525,
+        "method": "Questing (Doric's Quest, The Dig Site, Plague City, The Giant Dwarf, The Lost Tribe and Another Slice of H.A.M)"
+      },
+      {
+        "level": 31,
+        "rate": 13106,
+        "method": "Motherload mine (Mithril Pickaxe)"
+      },
+      {
+        "level": 41,
+        "rate": 15500,
+        "method": "Motherload mine (Adamant Pickaxe)"
+      },
+      {
+        "level": 61,
+        "rate": 29260,
+        "method": "Motherload mine (Dragon Pickaxe)"
+      },
+      {
+        "level": 70,
+        "rate": 30325,
+        "method": "Motherload mine"
+      },
+      {
+        "level": 85,
+        "rate": 43000,
+        "method": "Motherload mine"
+      },
+      {
+        "level": 99,
+        "rate": 54000,
+        "method": "Motherload mine"
+      }
+    ]
+  },
+  {
+    "skill": "herblore",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 10000,
+        "method": "Questing (Druidic Ritual)"
+      },
+      {
+        "level": 3,
+        "rate": 62500,
+        "method": "Attack potion"
+      },
+      {
+        "level": 15,
+        "rate": 116500,
+        "method": "Serum 207"
+      },
+      {
+        "level": 38,
+        "rate": 218750,
+        "method": "Prayer potion"
+      },
+      {
+        "level": 77,
+        "rate": 255000,
+        "method": "Stamina potion"
+      },
+      {
+        "level": 90,
+        "rate": 298000,
+        "method": "Super combat potion"
+      },
+      {
+        "level": 92,
+        "rate": 325000,
+        "method": "Super antifire potion"
+      }
+    ]
+  },
+  {
+    "skill": "agility",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 8000,
+        "method": "Gnome Stringhold Agility Course"
+      },
+      {
+        "level": 10,
+        "rate": 9000,
+        "method": "Draynor Village Rooftop Course"
+      },
+      {
+        "level": 20,
+        "rate": 9360,
+        "method": "Al Kharid Rooftop Course"
+      },
+      {
+        "level": 30,
+        "rate": 13200,
+        "method": "Varrock Rooftop Course"
+      },
+      {
+        "level": 40,
+        "rate": 19500,
+        "method": "Canifis Rooftop Course"
+      },
+      {
+        "level": 52,
+        "rate": 22000,
+        "method": "Falador Rooftop Course"
+      },
+      {
+        "level": 60,
+        "rate": 50000,
+        "method": "Seers' Village Rooftop Course (Kandarin hard diary)"
+      },
+      {
+        "level": 70,
+        "rate": 55000,
+        "method": "Seers' Village Rooftop Course (Kandarin hard diary)"
+      },
+      {
+        "level": 80,
+        "rate": 55000,
+        "method": "Rellekka Rooftop Course"
+      },
+      {
+        "level": 90,
+        "rate": 59000,
+        "method": "Ardougne Rooftop Course"
+      },
+      {
+        "level": 96,
+        "rate": 62300,
+        "method": "Ardougne Rooftop Course"
+      }
+    ]
+  },
+  {
+    "skill": "thieving",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 5000,
+        "method": "Men/Women"
+      },
+      {
+        "level": 5,
+        "rate": 19200,
+        "method": "Bakers' stalls"
+      },
+      {
+        "level": 25,
+        "rate": 38000,
+        "method": "Fruit Stalls (15% Hosidius favor)"
+      },
+      {
+        "level": 55,
+        "rate": 80000,
+        "method": "Knights of Ardougne (Ardougne hard diary & Dodgy necklace)"
+      },
+      {
+        "level": 60,
+        "rate": 90000,
+        "method": "Knights of Ardougne (Ardougne hard diary & Dodgy necklace)"
+      },
+      {
+        "level": 70,
+        "rate": 125000,
+        "method": "Knights of Ardougne (Ardougne hard diary & Dodgy necklace)"
+      },
+      {
+        "level": 80,
+        "rate": 160000,
+        "method": "Knights of Ardougne (Ardougne hard diary & Dodgy necklace)"
+      },
+      {
+        "level": 90,
+        "rate": 220000,
+        "method": "Knights of Ardougne (Ardougne hard diary & Dodgy necklace)"
+      },
+      {
+        "level": 91,
+        "rate": 270000,
+        "method": "Pyramid Plunder"
+      }
+    ]
+  },
+  {
+    "skill": "runecraft",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 5000,
+        "method": "Air runes"
+      },
+      {
+        "level": 9,
+        "rate": 10000,
+        "method": "Earth runes"
+      },
+      {
+        "level": 15,
+        "rate": 34580,
+        "method": "Smoke runes"
+      },
+      {
+        "level": 19,
+        "rate": 36400,
+        "method": "Steam runes"
+      },
+      {
+        "level": 50,
+        "rate": 56000,
+        "method": "Steam runes"
+      },
+      {
+        "level": 75,
+        "rate": 63000,
+        "method": "Steam runes"
+      },
+      {
+        "level": 77,
+        "rate": 37000,
+        "method": "Blood runes"
+      },
+      {
+        "level": 90,
+        "rate": 45000,
+        "method": "Soul runes"
+      }
+    ]
+  },
+  {
+    "skill": "hunter",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 10000,
+        "method": "Natural History Quiz"
+      },
+      {
+        "level": 7,
+        "rate": 10000,
+        "method": "Feldip weasels"
+      },
+      {
+        "level": 15,
+        "rate": 17000,
+        "method": "Ruby harvests + copper longtails"
+      },
+      {
+        "level": 29,
+        "rate": 22500,
+        "method": "Swamp lizards"
+      },
+      {
+        "level": 43,
+        "rate": 61000,
+        "method": "Falconry"
+      },
+      {
+        "level": 57,
+        "rate": 75000,
+        "method": "Falconry"
+      },
+      {
+        "level": 60,
+        "rate": 85000,
+        "method": "Red salamanders"
+      },
+      {
+        "level": 73,
+        "rate": 110000,
+        "method": "Black salamanders"
+      },
+      {
+        "level": 80,
+        "rate": 120000,
+        "method": "Carnivorous chinchompas"
+      },
+      {
+        "level": 90,
+        "rate": 140000,
+        "method": "Carnivorous chinchompas"
+      },
+      {
+        "level": 95,
+        "rate": 150000,
+        "method": "Carnivorous chinchompas"
+      },
+      {
+        "level": 99,
+        "rate": 155000,
+        "method": "Carnivorous chinchompas"
+      }
+    ]
+  },
+  {
+    "skill": "construction",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 10000,
+        "method": "Crude wooden chair"
+      },
+      {
+        "level": 8,
+        "rate": 20000,
+        "method": "Wooden chair"
+      },
+      {
+        "level": 19,
+        "rate": 30000,
+        "method": "Oak chair"
+      },
+      {
+        "level": 26,
+        "rate": 40000,
+        "method": "Oak armchair"
+      },
+      {
+        "level": 33,
+        "rate": 350000,
+        "method": "Oak larder"
+      },
+      {
+        "level": 74,
+        "rate": 450000,
+        "method": "Oak dungeon door"
+      }
+    ]
+  },
+  {
+    "skill": "attack",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 15000,
+        "method": ""
+      },
+      {
+        "level": 40,
+        "rate": 38000,
+        "method": ""
+      },
+      {
+        "level": 50,
+        "rate": 55000,
+        "method": ""
+      },
+      {
+        "level": 75,
+        "rate": 65000,
+        "method": ""
+      },
+      {
+        "level": 80,
+        "rate": 82000,
+        "method": ""
+      },
+      {
+        "level": 85,
+        "rate": 95000,
+        "method": ""
+      },
+      {
+        "level": 90,
+        "rate": 115000,
+        "method": ""
+      },
+      {
+        "level": 99,
+        "rate": 120000,
+        "method": ""
+      }
+    ]
+  },
+  {
+    "skill": "strength",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 15000,
+        "method": ""
+      },
+      {
+        "level": 40,
+        "rate": 38000,
+        "method": ""
+      },
+      {
+        "level": 50,
+        "rate": 55000,
+        "method": ""
+      },
+      {
+        "level": 75,
+        "rate": 65000,
+        "method": ""
+      },
+      {
+        "level": 80,
+        "rate": 82000,
+        "method": ""
+      },
+      {
+        "level": 85,
+        "rate": 95000,
+        "method": ""
+      },
+      {
+        "level": 90,
+        "rate": 115000,
+        "method": ""
+      },
+      {
+        "level": 99,
+        "rate": 120000,
+        "method": ""
+      }
+    ]
+  },
+  {
+    "skill": "defence",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 15000,
+        "method": ""
+      },
+      {
+        "level": 40,
+        "rate": 38000,
+        "method": ""
+      },
+      {
+        "level": 50,
+        "rate": 55000,
+        "method": ""
+      },
+      {
+        "level": 75,
+        "rate": 65000,
+        "method": ""
+      },
+      {
+        "level": 80,
+        "rate": 82000,
+        "method": ""
+      },
+      {
+        "level": 85,
+        "rate": 95000,
+        "method": ""
+      },
+      {
+        "level": 90,
+        "rate": 115000,
+        "method": ""
+      },
+      {
+        "level": 99,
+        "rate": 120000,
+        "method": ""
+      }
+    ]
+  },
+  {
+    "skill": "hitpoints",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 5000,
+        "method": ""
+      },
+      {
+        "level": 40,
+        "rate": 12600,
+        "method": ""
+      },
+      {
+        "level": 50,
+        "rate": 18300,
+        "method": ""
+      },
+      {
+        "level": 75,
+        "rate": 21600,
+        "method": ""
+      },
+      {
+        "level": 80,
+        "rate": 27300,
+        "method": ""
+      },
+      {
+        "level": 85,
+        "rate": 31600,
+        "method": ""
+      },
+      {
+        "level": 90,
+        "rate": 38300,
+        "method": ""
+      },
+      {
+        "level": 99,
+        "rate": 40000,
+        "method": ""
+      }
+    ]
+  },
+  {
+    "skill": "slayer",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 5000,
+        "method": ""
+      },
+      {
+        "level": 40,
+        "rate": 12000,
+        "method": ""
+      },
+      {
+        "level": 50,
+        "rate": 17000,
+        "method": ""
+      },
+      {
+        "level": 75,
+        "rate": 25000,
+        "method": ""
+      },
+      {
+        "level": 80,
+        "rate": 50000,
+        "method": ""
+      },
+      {
+        "level": 85,
+        "rate": 55000,
+        "method": ""
+      },
+      {
+        "level": 93,
+        "rate": 60000,
+        "method": ""
+      },
+      {
+        "level": 99,
+        "rate": 90000,
+        "method": ""
+      }
+    ]
+  },
+  {
+    "skill": "farming",
+    "methods": [
+      {
+        "level": 1,
+        "rate": 0,
+        "method": ""
+      },
+      {
+        "level": 34,
+        "rate": 25000,
+        "method": "Tithe Farm"
+      },
+      {
+        "level": 54,
+        "rate": 60000,
+        "method": "Tithe Farm"
+      },
+      {
+        "level": 74,
+        "rate": 95000,
+        "method": "Tithe Farm"
+      }
+    ]
+  }
+]

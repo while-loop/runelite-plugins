@@ -1,13 +1,13 @@
-package com.example;
+package com.ttl;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
-public class ExamplePluginTest
+public class TimeToLevelPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(ExamplePlugin.class);
+		ExternalPluginManager.loadBuiltin(TimeToLevelPlugin.class);
 		RuneLite.main(args);
 	}
 }
