@@ -185,7 +185,7 @@ public class RuneWatchPlugin extends Plugin {
         keyManager.registerKeyListener(hotkeyListener);
         spriteManager.getSpriteAsync(SpriteID.CHATBOX_REPORT_BUTTON, 0, s -> reportButton = s);
         overlayManager.add(screenshotOverlay);
-        caseManager.refresh();
+        caseManager.refresh(this::colorAll);
     }
 
     @Override
@@ -268,7 +268,7 @@ public class RuneWatchPlugin extends Plugin {
     @Subscribe
     public void onPlayerMenuOptionClicked(PlayerMenuOptionClicked event) {
         if (event.getMenuOption().equals(INVESTIGATE)) {
-            alertPlayerWarning(event.getMenuTarget(), true, false);
+            caseManager.get(event.getMenuTarget(), (rwCase) -> alertPlayerWarning(event.getMenuTarget(), true, false));
         }
     }
 
@@ -373,18 +373,19 @@ public class RuneWatchPlugin extends Plugin {
 
     @Schedule(period = 30, unit = ChronoUnit.MINUTES)
     public void refreshList() {
-        caseManager.refresh();
-        colorAll();
+        caseManager.refresh(this::colorAll);
     }
 
     @Subscribe
     public void onCommandExecuted(CommandExecuted ce) {
         if (developerMode && ce.getCommand().equals("rw")) {
-            caseManager.refresh();
-            if (ce.getArguments().length > 0) {
-                // refresh is async, so wait a bit before adding the test rsn
-                executor.schedule(() -> caseManager.put(String.join(" ", ce.getArguments())), 2, TimeUnit.SECONDS);
-            }
+            caseManager.refresh(()-> {
+                if (ce.getArguments().length > 0) {
+                    // refresh is async, so wait a bit before adding the test rsn
+                    caseManager.put(String.join(" ", ce.getArguments()));
+                }
+                colorAll();
+            });
         }
     }
 
