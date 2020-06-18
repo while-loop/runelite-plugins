@@ -24,7 +24,7 @@ The config allows to set hotkeys to help advance through rotation selection.
 Screenshots
 -----------
 
-![player](/assets/player.png "player") ![cox](/assets/cox.png "cox") ![clan](/assets/clan.png "clan")  
+![player](/assets/player.png "player") ![cox](/assets/cox.png "cox") ![fc](/assets/fc.png "fc")  
 ![trade](/assets/trade.png "trade") ![tob](/assets/tob.png "tob")
 
 

@@ -15,7 +15,7 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
 import net.runelite.api.SpriteID;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.ClanMemberJoined;
+import net.runelite.api.events.FriendsChatMemberJoined;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameTick;
@@ -105,7 +105,7 @@ public class RuneWatchPlugin extends Plugin {
 
     private static final List<Integer> MENU_WIDGET_IDS = ImmutableList.of(
             WidgetInfo.FRIENDS_LIST.getGroupId(),
-            WidgetInfo.CLAN_CHAT.getGroupId(),
+            WidgetInfo.FRIENDS_CHAT.getGroupId(),
             WidgetInfo.CHATBOX.getGroupId(),
             WidgetInfo.RAIDING_PARTY.getGroupId(),
             WidgetInfo.PRIVATE_CHAT_MESSAGE.getGroupId(),
@@ -223,7 +223,7 @@ public class RuneWatchPlugin extends Plugin {
 
     private void colorAll() {
         clientThread.invokeLater(() -> {
-            colorClanChat();
+            colorFriendsChat();
 
             colorRaidsSidePanel();
             colorRaidsPartyList();
@@ -276,8 +276,8 @@ public class RuneWatchPlugin extends Plugin {
     public void onScriptPostFired(ScriptPostFired event) {
         Runnable color = null;
         switch (event.getScriptId()) {
-            case ScriptID.CLAN_CHAT_CHANNEL_BUILD:
-                color = this::colorClanChat;
+            case ScriptID.FRIENDS_CHAT_CHANNEL_REBUILD:
+                color = this::colorFriendsChat;
                 break;
             case SCRIPT_ID_TOB_HUD_DRAW:
                 color = this::colorTobHud;
@@ -304,7 +304,7 @@ public class RuneWatchPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onClanMemberJoined(ClanMemberJoined event) {
+    public void onFriendsChatMemberJoined(FriendsChatMemberJoined event) {
         String rsn = Text.toJagexName(event.getMember().getName());
         String local = client.getLocalPlayer().getName();
         if (rsn.equals(local)) {
@@ -469,12 +469,12 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
-    private void alertPlayerWarning(String rsn, boolean notifyClear, boolean clan) {
+    private void alertPlayerWarning(String rsn, boolean notifyClear, boolean fc) {
         rsn = Text.toJagexName(rsn);
         Case rwCase = caseManager.get(rsn);
         ChatMessageBuilder response = new ChatMessageBuilder();
-        if (clan) {
-            response.append("Clan member, ");
+        if (fc) {
+            response.append("Friends chat member, ");
         }
         response.append(ChatColorType.HIGHLIGHT)
                 .append(rsn)
@@ -501,8 +501,8 @@ public class RuneWatchPlugin extends Plugin {
                 .build());
     }
 
-    private void colorClanChat() {
-        Widget ccList = client.getWidget(WidgetInfo.CLAN_CHAT_LIST);
+    private void colorFriendsChat() {
+        Widget ccList = client.getWidget(WidgetInfo.FRIENDS_CHAT_LIST);
         if (ccList == null) {
             return;
         }
