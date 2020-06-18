@@ -378,7 +378,7 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onCommandExecuted(CommandExecuted ce) {
-        if (developerMode && ce.getCommand().equals("rw")) {
+        if (developerMode && ce.getCommand().equals("rwd")) {
             caseManager.refresh(()-> {
                 if (ce.getArguments().length > 0) {
                     // refresh is async, so wait a bit before adding the test rsn
@@ -386,6 +386,9 @@ public class RuneWatchPlugin extends Plugin {
                 }
                 colorAll();
             });
+        } else if (ce.getCommand().equals("rw")) {
+            final String rsn = String.join(" ", ce.getArguments());
+            caseManager.get(rsn, (c) -> alertPlayerWarning(rsn, true, false));
         }
     }
 
@@ -504,41 +507,37 @@ public class RuneWatchPlugin extends Plugin {
 
     private void colorFriendsChat() {
         Widget ccList = client.getWidget(WidgetInfo.FRIENDS_CHAT_LIST);
-        if (ccList == null) {
-            return;
-        }
+        if (ccList != null) {
+            Widget[] players = ccList.getDynamicChildren();
+            for (int i = 0; i < players.length; i += 3) {
+                Widget player = players[i];
+                if (player == null) {
+                    continue;
+                }
 
-        Widget[] players = ccList.getDynamicChildren();
-        for (int i = 0; i < players.length; i += 3) {
-            Widget player = players[i];
-            if (player == null) {
-                continue;
+                Case rwCase = caseManager.get(player.getText());
+                if (rwCase == null) {
+                    continue;
+                }
+
+                player.setTextColor(config.playerTextColor().getRGB());
+                player.revalidate();
             }
-
-            Case rwCase = caseManager.get(player.getText());
-            if (rwCase == null) {
-                continue;
-            }
-
-            player.setTextColor(config.playerTextColor().getRGB());
-            player.revalidate();
         }
     }
 
     private void colorRaidsSidePanel() {
         Widget raidsList = client.getWidget(WidgetID.RAIDING_PARTY_GROUP_ID, 10);
-        if (raidsList == null) {
-            return;
+        if (raidsList != null) {
+            colorTable(raidsList, 4);
         }
-        colorTable(raidsList, 4);
     }
 
     private void colorRaidsParty() {
         Widget table = client.getWidget(COX_PARTY_DETAILS_GROUP_ID, 11);
-        if (table == null) {
-            return;
+        if (table != null) {
+            colorTable(table, 5);
         }
-        colorTable(table, 5);
     }
 
     private void colorRaidsPartyList() {
