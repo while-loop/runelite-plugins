@@ -4,11 +4,17 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup(RuneWatchPlugin.CONFIG_GROUP)
+import java.awt.*;
+
+@ConfigGroup(RuneWatchConfig.CONFIG_GROUP)
 public interface RuneWatchConfig extends Config {
+    String CONFIG_GROUP = "runewatch";
+    String PLAYER_OPTION = "playerOption";
+    String PLAYER_TEXT_COLOR = "playerTextColor";
+
     @ConfigItem(
             position = 1,
-            keyName = "playerOption",
+            keyName = PLAYER_OPTION,
             name = "Player option",
             description = "Add investigate option to players"
     )
@@ -28,11 +34,11 @@ public interface RuneWatchConfig extends Config {
 
     @ConfigItem(
             position = 3,
-            keyName = "warningIcon",
-            name = "Warning Icon",
-            description = "Show warning icon next players' usernames"
+            keyName = PLAYER_TEXT_COLOR,
+            name = "Watchlist color",
+            description = "Allows you to change the color of the reported player's rsn in most player lists"
     )
-    default boolean warningIcon() {
-        return true;
+    default Color playerTextColor() {
+        return new Color(255, 77, 0);
     }
 }

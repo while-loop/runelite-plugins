@@ -7,32 +7,52 @@ import joptsimple.internal.Strings;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
-import net.runelite.api.events.*;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.ScriptID;
+import net.runelite.api.SpriteID;
+import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.ClanMemberJoined;
+import net.runelite.api.events.CommandExecuted;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.PlayerMenuOptionClicked;
+import net.runelite.api.events.ScriptPostFired;
+import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.task.Schedule;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +66,6 @@ import static net.runelite.client.util.ImageUploadStyle.NEITHER;
         enabledByDefault = false
 )
 public class RuneWatchPlugin extends Plugin {
-    static final String CONFIG_GROUP = "runewatch";
     private static final String INVESTIGATE = "Investigate";
     private static final String FOLDER_NAME = "Trades";
 
@@ -67,7 +86,14 @@ public class RuneWatchPlugin extends Plugin {
     private static final int PLAYER_TRADE_CONFIRMATION_TRADING_WITH = 30;
     private static final int PLAYER_TRADE_CONFIRMATION_TRADE_MODIFIED_THEM = 31;
 
-    private static final int RAIDING_PARTY_RECRUITMENT_BOARD_GROUP_ID = 507;
+    private static final int COX_PARTY_LIST_GROUP_ID = 499;
+    private static final int TOB_PARTY_LIST_GROUP_ID = 364;
+    private static final int COX_PARTY_DETAILS_GROUP_ID = 507;
+    private static final int TOB_PARTY_DETAILS_GROUP_ID = 50;
+
+    // https://raw.githubusercontent.com/RuneStar/cache-names/master/names.tsv
+    private static final int SCRIPT_ID_TOB_HUD_DRAW = 2297;
+    private static final int SCRIPT_ID_RAIDS_SIDEPANEL_ENTRY_SETUP = 1550;
 
     private static final List<Integer> TRADE_SCREEN_GROUP_IDS = Arrays.asList(
             PLAYER_TRADE_OFFER_GROUP_ID,
@@ -81,11 +107,12 @@ public class RuneWatchPlugin extends Plugin {
             WidgetInfo.RAIDING_PARTY.getGroupId(),
             WidgetInfo.PRIVATE_CHAT_MESSAGE.getGroupId(),
             WidgetInfo.IGNORE_LIST.getGroupId(),
-            RAIDING_PARTY_RECRUITMENT_BOARD_GROUP_ID
+            COX_PARTY_DETAILS_GROUP_ID,
+            TOB_PARTY_DETAILS_GROUP_ID
     );
 
     private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(
-            "Message", "Add ignore", "Remove friend", "Delete", "Kick"
+            "Message", "Add ignore", "Remove friend", "Delete", "Kick", "Reject"
     );
 
     @Inject
@@ -107,7 +134,7 @@ public class RuneWatchPlugin extends Plugin {
     private ScheduledExecutorService executor;
 
     @Inject
-    private RuneWatchOverlay runeWatchOverlay;
+    private RuneWatchOverlay screenshotOverlay;
 
     @Getter(AccessLevel.PACKAGE)
     private BufferedImage reportButton;
@@ -118,6 +145,16 @@ public class RuneWatchPlugin extends Plugin {
     @Inject
     private OverlayManager overlayManager;
 
+    @Inject
+    CaseManager caseManager;
+
+    @Inject
+    ClientThread clientThread;
+
+    @Inject
+    @Named("developerMode")
+    boolean developerMode;
+
     private Image tradeImage;
     private String trader;
 
@@ -127,22 +164,54 @@ public class RuneWatchPlugin extends Plugin {
     }
 
     @Override
-    protected void startUp() throws Exception {
+    protected void startUp() {
         if (config.playerOption() && client != null) {
             menuManager.addPlayerMenuItem(INVESTIGATE);
         }
 
         spriteManager.getSpriteAsync(SpriteID.CHATBOX_REPORT_BUTTON, 0, s -> reportButton = s);
-        overlayManager.add(runeWatchOverlay);
+        overlayManager.add(screenshotOverlay);
+        caseManager.refresh();
     }
 
     @Override
-    protected void shutDown() throws Exception {
+    protected void shutDown() {
         if (config.playerOption() && client != null) {
             menuManager.removePlayerMenuItem(INVESTIGATE);
         }
 
-        overlayManager.remove(runeWatchOverlay);
+        overlayManager.remove(screenshotOverlay);
+    }
+
+    @Subscribe
+    public void onConfigChanged(ConfigChanged event) {
+        if (!event.getGroup().equals(RuneWatchConfig.CONFIG_GROUP)) {
+            return;
+        }
+
+        if (event.getKey().equals(RuneWatchConfig.PLAYER_OPTION)) {
+            if (!Boolean.parseBoolean(event.getOldValue()) && Boolean.parseBoolean(event.getNewValue())) {
+                menuManager.addPlayerMenuItem(INVESTIGATE);
+            } else if (Boolean.parseBoolean(event.getOldValue()) && !Boolean.parseBoolean(event.getNewValue())) {
+                menuManager.removePlayerMenuItem(INVESTIGATE);
+            }
+        } else if (event.getKey().equals(RuneWatchConfig.PLAYER_TEXT_COLOR)) {
+            colorAll();
+        }
+    }
+
+    private void colorAll() {
+        clientThread.invokeLater(() -> {
+            colorClanChat();
+
+            colorRaidsSidePanel();
+            colorRaidsPartyList();
+            colorRaidsParty();
+
+            colorTobHud();
+            colorTobParty();
+            colorTobPartyList();
+        });
     }
 
     @Subscribe
@@ -170,48 +239,48 @@ public class RuneWatchPlugin extends Plugin {
         lookup.setParam1(event.getActionParam1());
         lookup.setIdentifier(event.getIdentifier());
 
-        insertMenuEntry(lookup, client.getMenuEntries());
+        MenuEntry[] newMenu = ObjectArrays.concat(client.getMenuEntries(), lookup);
+        ArrayUtils.swap(newMenu, newMenu.length - 1, newMenu.length - 2);
+        client.setMenuEntries(newMenu);
     }
 
     @Subscribe
     public void onPlayerMenuOptionClicked(PlayerMenuOptionClicked event) {
-        if (!event.getMenuOption().equals(INVESTIGATE)) {
-            return;
+        if (event.getMenuOption().equals(INVESTIGATE)) {
+            alertPlayerWarning(event.getMenuTarget(), true, false);
         }
-
-        String rsn = event.getMenuTarget();
-        showPlayerWarning(rsn, true, false);
     }
 
     @Subscribe
     public void onScriptPostFired(ScriptPostFired event) {
-        if (event.getScriptId() == ScriptID.CLAN_CHAT_CHANNEL_BUILD) {
-            colorClanChat();
+        Runnable color = null;
+        switch (event.getScriptId()) {
+            case ScriptID.CLAN_CHAT_CHANNEL_BUILD:
+                color = this::colorClanChat;
+                break;
+            case SCRIPT_ID_TOB_HUD_DRAW:
+                color = this::colorTobHud;
+                break;
+            case SCRIPT_ID_RAIDS_SIDEPANEL_ENTRY_SETUP:
+                color = this::colorRaidsSidePanel;
+                break;
+        }
+
+        if (color != null) {
+            clientThread.invokeLater(color);
         }
     }
 
     @Subscribe
     public void onGameTick(GameTick event) {
+        // check trade screens on tick. When a player removes/adds items, the warning message gets recreated
         for (int gid : TRADE_SCREEN_GROUP_IDS) {
             Widget w = client.getWidget(gid, 0);
             if (w != null) {
                 showTradeWarning(gid);
             }
         }
-
-        colorRaidsList();
-        colorTob();
     }
-
-    /**
-     * [Client] INFO com.runewatch.RuneWatchPlugin - 1004
-     * [Client] INFO com.runewatch.RuneWatchPlugin - 3351
-     * [Client] INFO com.runewatch.RuneWatchPlugin - 3350
-     * [Client] INFO com.runewatch.RuneWatchPlugin - 3175
-     * [Client] INFO com.runewatch.RuneWatchPlugin - 3174
-     *
-     * @param event
-     */
 
     @Subscribe
     public void onClanMemberJoined(ClanMemberJoined event) {
@@ -221,7 +290,7 @@ public class RuneWatchPlugin extends Plugin {
             return;
         }
 
-        showPlayerWarning(rsn, false, true);
+        alertPlayerWarning(rsn, false, true);
     }
 
     @Subscribe
@@ -241,8 +310,27 @@ public class RuneWatchPlugin extends Plugin {
     @Subscribe
     public void onWidgetLoaded(final WidgetLoaded event) {
         int groupId = event.getGroupId();
-        if (groupId == PLAYER_TRADE_CONFIRMATION_GROUP_ID) {
-            takeScreenshot();
+        Runnable task = null;
+        switch (groupId) {
+            case PLAYER_TRADE_CONFIRMATION_GROUP_ID:
+                task = this::takeScreenshot;
+                break;
+            case COX_PARTY_LIST_GROUP_ID:
+                task = this::colorRaidsPartyList;
+                break;
+            case COX_PARTY_DETAILS_GROUP_ID:
+                task = this::colorRaidsParty;
+                break;
+            case TOB_PARTY_DETAILS_GROUP_ID:
+                task = this::colorTobParty;
+                break;
+            case TOB_PARTY_LIST_GROUP_ID:
+                task = this::colorTobPartyList;
+                break;
+        }
+
+        if (task != null) {
+            clientThread.invokeLater(task);
         }
     }
 
@@ -262,13 +350,30 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
+    @Schedule(period = 30, unit = ChronoUnit.MINUTES)
+    public void refreshList() {
+        caseManager.refresh();
+        colorAll();
+    }
+
+    @Subscribe
+    public void onCommandExecuted(CommandExecuted ce) {
+        if (developerMode && ce.getCommand().equals("rw")) {
+            caseManager.refresh();
+            if (ce.getArguments().length > 0) {
+                // refresh is async, so wait a bit before adding the test rsn
+                executor.schedule(() -> caseManager.put(String.join(" ", ce.getArguments())), 2, TimeUnit.SECONDS);
+            }
+        }
+    }
+
     private void clearScreenshot() {
         tradeImage = null;
         trader = null;
     }
 
     private void takeScreenshot() {
-        runeWatchOverlay.queueForTimestamp(image -> {
+        screenshotOverlay.queueForTimestamp(image -> {
             Widget nameWidget = client.getWidget(PLAYER_TRADE_CONFIRMATION_GROUP_ID, PLAYER_TRADE_CONFIRMATION_TRADING_WITH);
             trader = "unknown";
             if (nameWidget != null) {
@@ -322,7 +427,7 @@ public class RuneWatchPlugin extends Plugin {
             return;
         }
         String trader = m.group(2);
-        RuneWatchCase rwCase = getUserCase(trader);
+        Case rwCase = caseManager.get(trader);
         if (rwCase == null) {
             return;
         }
@@ -343,16 +448,9 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
-    private void insertMenuEntry(MenuEntry newEntry, MenuEntry[] entries) {
-        MenuEntry[] newMenu = ObjectArrays.concat(entries, newEntry);
-        int menuEntryCount = newMenu.length;
-        ArrayUtils.swap(newMenu, menuEntryCount - 1, menuEntryCount - 2);
-        client.setMenuEntries(newMenu);
-    }
-
-    private void showPlayerWarning(String rsn, boolean notifyClear, boolean clan) {
+    private void alertPlayerWarning(String rsn, boolean notifyClear, boolean clan) {
         rsn = Text.toJagexName(rsn);
-        RuneWatchCase rwCase = getUserCase(rsn);
+        Case rwCase = caseManager.get(rsn);
         ChatMessageBuilder response = new ChatMessageBuilder();
         if (clan) {
             response.append("Clan member, ");
@@ -369,7 +467,8 @@ public class RuneWatchPlugin extends Plugin {
             response
                     .append(" is on RuneWatch's list for ")
                     .append(ChatColorType.HIGHLIGHT)
-                    .append(rwCase.getType() + " " + rwCase.niceValue() + " ")
+                    .append(rwCase.getReason())
+                    .append(String.format(" (%s) ", rwCase.getRating()))
                     .append(ChatColorType.NORMAL)
                     .append("on " + rwCase.niceDate())
                     .append(".");
@@ -379,16 +478,6 @@ public class RuneWatchPlugin extends Plugin {
                 .type(ChatMessageType.CONSOLE)
                 .runeLiteFormattedMessage(response.build())
                 .build());
-    }
-
-    private RuneWatchCase getUserCase(String rsn) {
-        rsn = Text.toJagexName(rsn);
-        Random rnd = new Random();
-//        if (rnd.nextBoolean()) {
-//            return null;
-//        }
-
-        return new RuneWatchCase(rsn, Calendar.getInstance(), Math.abs(rnd.nextInt()), "LOAN");
     }
 
     private void colorClanChat() {
@@ -404,47 +493,48 @@ public class RuneWatchPlugin extends Plugin {
                 continue;
             }
 
-            RuneWatchCase rwCase = getUserCase(Text.toJagexName(player.getText()));
+            Case rwCase = caseManager.get(player.getText());
             if (rwCase == null) {
                 continue;
             }
 
-            player.setTextColor(Color.RED.getRGB());
+            player.setTextColor(config.playerTextColor().getRGB());
             player.revalidate();
         }
     }
 
-    private void colorRaidsList() {
+    private void colorRaidsSidePanel() {
         Widget raidsList = client.getWidget(WidgetID.RAIDING_PARTY_GROUP_ID, 10);
         if (raidsList == null) {
             return;
         }
-        Widget[] players = raidsList.getDynamicChildren();
-        for (int i = 1; i < players.length; i += 4) {
-            Widget player = players[i];
-            if (player == null) {
-                continue;
-            }
+        colorTable(raidsList, 4);
+    }
 
-            RuneWatchCase rwCase = getUserCase(Text.removeTags(Text.toJagexName(player.getText())));
-            if (rwCase == null) {
-                continue;
-            }
+    private void colorRaidsParty() {
+        Widget table = client.getWidget(COX_PARTY_DETAILS_GROUP_ID, 11);
+        if (table == null) {
+            return;
+        }
+        colorTable(table, 5);
+    }
 
-            player.setTextColor(Color.RED.getRGB());
-            player.setText(Text.removeTags(player.getText()));
-            player.revalidate();
+    private void colorRaidsPartyList() {
+        Widget list = client.getWidget(COX_PARTY_LIST_GROUP_ID, 14);
+        if (list != null) {
+            colorList(list, 3);
         }
     }
 
-    private void colorTob() {
-        Widget tobList = client.getWidget(28, 9);
-        if (tobList != null) {
-            String names = tobList.getText(); // whileloop The Olmlet<br>-<br>-<br>-
-            if (Strings.isNullOrEmpty(names)) {
-                return;
-            }
+    private void colorTobHud() {
+        // top right corner widget
+        Widget hud = client.getWidget(28, 9);
+        if (hud == null) {
+            return;
+        }
 
+        String names = hud.getText(); // user1<br>user2<br>-<br>-<br>-
+        if (!Strings.isNullOrEmpty(names)) {
             List<String> newNames = new ArrayList<>();
             for (String name : names.split("<br>")) {
                 if (name.equals("-")) {
@@ -453,43 +543,73 @@ public class RuneWatchPlugin extends Plugin {
                 }
 
                 String stripped = Text.removeTags(name);
-                RuneWatchCase rwCase = getUserCase(stripped);
+                Case rwCase = caseManager.get(stripped);
                 if (rwCase == null) {
                     newNames.add(name);
                     continue;
                 }
 
-                String colored = new ChatMessageBuilder().append(Color.RED, stripped).build();
+                String colored = new ChatMessageBuilder().append(config.playerTextColor(), stripped).build();
                 newNames.add(colored);
             }
+            hud.setText(String.join("<br>", newNames));
+        }
+    }
 
-            tobList.setText(String.join("<br>", newNames));
+    private void colorTobParty() {
+        // current party members
+        Widget table = client.getWidget(TOB_PARTY_DETAILS_GROUP_ID, 26);
+        if (table != null) {
+            // idx = 0 whole row, 1/12/23/... = rsn cell
+            colorTable(table, 11);
         }
 
-        // get current party list
-        tobList = client.getWidget(28, 9);
-
         // get current party application list
-        tobList = client.getWidget(28, 9);
+        table = client.getWidget(TOB_PARTY_DETAILS_GROUP_ID, 41);
+        if (table != null) {
+            // idx = 0 whole row, 0-18 = cells,1 = name
+            colorTable(table, 18);
+        }
+    }
+
+    private void colorTobPartyList() {
+        Widget list = client.getWidget(TOB_PARTY_LIST_GROUP_ID, 16);
+        if (list != null) {
+            colorList(list, 3);
+        }
+    }
+
+    private void colorTable(Widget table, int inc) {
+        Widget[] players = table.getDynamicChildren();
+        for (int i = 1; i < players.length; i += inc) {
+            Widget player = players[i];
+            if (player == null) {
+                continue;
+            }
+
+            Case rwCase = caseManager.get(Text.removeTags(player.getText()));
+            if (rwCase == null) {
+                continue;
+            }
+
+            player.setTextColor(config.playerTextColor().getRGB());
+            player.setText(Text.removeTags(player.getText()));
+            player.revalidate();
+        }
+    }
+
+    private void colorList(Widget list, int nameIdx) {
+        for (Widget row : list.getStaticChildren()) {
+            Widget name = row.getChild(nameIdx);
+            if (name == null) {
+                continue;
+            }
+
+            if (caseManager.get(name.getText()) != null) {
+                name.setTextColor(config.playerTextColor().getRGB());
+                name.setText(Text.removeTags(name.getText())); // `col` is set on the name too
+                name.revalidate();
+            }
+        }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
