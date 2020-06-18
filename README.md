@@ -30,7 +30,7 @@ Screenshots
 
 License
 -------
-RuneWatch External Plugin is licensed under the BSD 2-Clause License License. See LICENSE for details.
+RuneWatch External Plugin is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 Author
 ------
