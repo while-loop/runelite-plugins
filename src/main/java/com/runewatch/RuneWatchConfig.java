@@ -34,6 +34,16 @@ public interface RuneWatchConfig extends Config {
 
     @ConfigItem(
             position = 3,
+            keyName = "useHotkey",
+            name = "Require Shift-Click",
+            description = "Require Shift-Right-Click to view investigate option in menus"
+    )
+    default boolean useHotkey() {
+        return false;
+    }
+
+    @ConfigItem(
+            position = 4,
             keyName = PLAYER_TEXT_COLOR,
             name = "Watchlist color",
             description = "Allows you to change the color of the reported player's rsn in most player lists"

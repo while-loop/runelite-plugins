@@ -6,6 +6,7 @@ import com.google.inject.Provides;
 import joptsimple.internal.Strings;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -16,6 +17,7 @@ import net.runelite.api.SpriteID;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClanMemberJoined;
 import net.runelite.api.events.CommandExecuted;
+import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
@@ -34,6 +36,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.SpriteManager;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -155,6 +158,16 @@ public class RuneWatchPlugin extends Plugin {
     @Named("developerMode")
     boolean developerMode;
 
+    @Inject
+    RuneWatchInputListener hotkeyListener;
+
+    @Inject
+    KeyManager keyManager;
+
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    private boolean hotKeyPressed;
+
     private Image tradeImage;
     private String trader;
 
@@ -169,6 +182,7 @@ public class RuneWatchPlugin extends Plugin {
             menuManager.addPlayerMenuItem(INVESTIGATE);
         }
 
+        keyManager.registerKeyListener(hotkeyListener);
         spriteManager.getSpriteAsync(SpriteID.CHATBOX_REPORT_BUTTON, 0, s -> reportButton = s);
         overlayManager.add(screenshotOverlay);
         caseManager.refresh();
@@ -179,7 +193,7 @@ public class RuneWatchPlugin extends Plugin {
         if (config.playerOption() && client != null) {
             menuManager.removePlayerMenuItem(INVESTIGATE);
         }
-
+        keyManager.unregisterKeyListener(hotkeyListener);
         overlayManager.remove(screenshotOverlay);
     }
 
@@ -200,6 +214,13 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
+    @Subscribe
+    public void onFocusChanged(FocusChanged focusChanged) {
+        if (!focusChanged.isFocused()) {
+            hotKeyPressed = false;
+        }
+    }
+
     private void colorAll() {
         clientThread.invokeLater(() -> {
             colorClanChat();
@@ -216,7 +237,7 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onMenuEntryAdded(MenuEntryAdded event) {
-        if (!config.menuOption()) {
+        if (!config.menuOption() || (!hotKeyPressed && config.useHotkey())) {
             return;
         }
 
