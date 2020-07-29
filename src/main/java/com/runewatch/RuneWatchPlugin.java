@@ -305,13 +305,15 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onFriendsChatMemberJoined(FriendsChatMemberJoined event) {
-        String rsn = Text.toJagexName(event.getMember().getName());
-        String local = client.getLocalPlayer().getName();
-        if (rsn.equals(local)) {
-            return;
-        }
+        if (config.notifyOnJoin()) {
+            String rsn = Text.toJagexName(event.getMember().getName());
+            String local = client.getLocalPlayer().getName();
+            if (rsn.equals(local)) {
+                return;
+            }
 
-        alertPlayerWarning(rsn, false, true);
+            alertPlayerWarning(rsn, false, true);
+        }
     }
 
     @Subscribe

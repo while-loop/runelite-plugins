@@ -85,10 +85,29 @@ public interface RuneWatchConfig extends Config {
     @ConfigItem(
             position = 6,
             keyName = PLAYER_TEXT_COLOR,
-            name = "Watchlist color",
+            name = "Highlight color",
             description = "Allows you to change the color of the reported player's rsn in most player lists"
     )
     default Color playerTextColor() {
         return new Color(255, 77, 0);
     }
+
+    @ConfigSection(
+            name = "Friends Chat",
+            description = "All the options notifying friends/clan chat",
+            position = 80
+    )
+    String CHAT_SECTION = "Friends Chat";
+
+    @ConfigItem(
+            position = 7,
+            keyName = "notifyOnJoin",
+            name = "Alert On Join",
+            description = "Send an alert message when a player on the watchlist enters a Clan/Friends Chat",
+            section = CHAT_SECTION
+    )
+    default boolean notifyOnJoin() {
+        return true;
+    }
+
 }
