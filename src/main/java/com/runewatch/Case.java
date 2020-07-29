@@ -32,7 +32,27 @@ public class Case {
     @SerializedName("evidence_rating")
     private String rating;
 
+    // "RW" / "WDR" / null
+    @SerializedName("source")
+    private String source;
+
     public String niceDate() {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DATE_FORMAT);
+    }
+
+    public String getSource(){
+        return (source == null) ? "RW" : source;
+    }
+
+    public boolean isRW(){
+        return !getSource().toLowerCase().equals("wdr");
+    }
+
+    public String niceSourcePossessive() {
+        switch (getSource().toLowerCase()) {
+            case "rw": return "RuneWatch's";
+            case "wdr": return "We Do Raids'";
+            default: return "Unknown's";
+        }
     }
 }

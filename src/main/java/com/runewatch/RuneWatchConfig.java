@@ -95,7 +95,7 @@ public interface RuneWatchConfig extends Config {
     @ConfigSection(
             name = "Friends Chat",
             description = "All the options notifying friends/clan chat",
-            position = 80
+            position = 70
     )
     String CHAT_SECTION = "Friends Chat";
 
@@ -110,4 +110,32 @@ public interface RuneWatchConfig extends Config {
         return true;
     }
 
+    @ConfigSection(
+            name = "Sources",
+            description = "Configure sources for investigating reported players",
+            position = 50
+    )
+    String SOURCES_SECTION = "Sources";
+
+    @ConfigItem(
+            position = 8,
+            keyName = "useRW",
+            name = "Use RuneWatch",
+            description = "Check for reported players against the RuneWatch watchlist",
+            section = SOURCES_SECTION
+    )
+    default boolean useRW() {
+        return true;
+    }
+
+    @ConfigItem(
+            position = 9,
+            keyName = "useWDR",
+            name = "Use We Do Raids",
+            description = "Check for reported players against the We Do Raids banlist",
+            section = SOURCES_SECTION
+    )
+    default boolean useWDR() {
+        return true;
+    }
 }

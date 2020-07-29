@@ -384,7 +384,10 @@ public class RuneWatchPlugin extends Plugin {
             caseManager.refresh(()-> {
                 if (ce.getArguments().length > 0) {
                     // refresh is async, so wait a bit before adding the test rsn
-                    caseManager.put(String.join(" ", ce.getArguments()));
+                    caseManager.put(
+                            String.join(" ", Arrays.copyOfRange(ce.getArguments(), 1, ce.getArguments().length)),
+                            ce.getArguments()[0].toUpperCase()
+                            );
                 }
                 colorAll();
             });
@@ -465,7 +468,7 @@ public class RuneWatchPlugin extends Plugin {
 
         String wText = tradeModified.getText();
         if (!wText.contains("WARNING")) {
-            String warningMsg = String.format("<br>WARNING: %s is on RuneWatch's list.", trader);
+            String warningMsg = String.format("<br>WARNING: %s is on %s list.", trader, rwCase.niceSourcePossessive());
             String msg = wText + warningMsg;
             tradeModified.setText(msg);
 
@@ -493,10 +496,10 @@ public class RuneWatchPlugin extends Plugin {
         if (rwCase == null && !notifyClear) {
             return;
         } else if (rwCase == null) {
-            response.append(" is not on RuneWatch's list.");
+            response.append(" is not on any watchlist.");
         } else {
             response
-                    .append(" is on RuneWatch's list for ")
+                    .append(String.format(" is on %s list for ", rwCase.niceSourcePossessive()))
                     .append(ChatColorType.HIGHLIGHT)
                     .append(rwCase.getReason())
                     .append(String.format(" (%s) ", rwCase.getRating()))

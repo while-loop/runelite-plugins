@@ -1,7 +1,6 @@
 package com.runewatch;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.annotations.VisibleForDevtools;
@@ -19,6 +18,10 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -29,20 +32,31 @@ import java.util.function.Consumer;
 @Slf4j
 @Singleton
 public class CaseManager {
-    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://www.runewatch.com/api/cases/list");
+    private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://www.runewatch.com/api/cases/mixedlist");
     private static final HttpUrl RUNEWATCH_CASES_URL = HttpUrl.parse("https://www.runewatch.com/api/cases");
-    private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd hh:mm:ss").create();
+    final Gson GSON = new GsonBuilder().registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
+        try {
+            // Allow handling of the occasional empty string as a date.
+            return df.parse(json.getAsString());
+        } catch (ParseException e) {
+            return Date.from(Instant.ofEpochSecond(0));
+        }
+    }).create();
     private static final Type typeToken = new TypeToken<List<Case>>() {
     }.getType();
 
     private final OkHttpClient client;
-    private final Map<String, Case> runewatchCases = new ConcurrentHashMap<>();
+    private final Map<String, Case> rwCases = new ConcurrentHashMap<>();
+    private final Map<String, Case> wdrCases = new ConcurrentHashMap<>();
     private final ClientThread clientThread;
+    private final RuneWatchConfig config;
 
     @Inject
-    private CaseManager(OkHttpClient client, ClientThread clientThread) {
+    private CaseManager(OkHttpClient client, ClientThread clientThread, RuneWatchConfig config) {
         this.client = client;
         this.clientThread = clientThread;
+        this.config = config;
     }
 
     /**
@@ -62,16 +76,20 @@ public class CaseManager {
             public void onResponse(Call call, Response response) {
                 try {
                     List<Case> cases = GSON.fromJson(new InputStreamReader(response.body().byteStream()), typeToken);
-                    runewatchCases.clear();
+                    rwCases.clear();
+                    wdrCases.clear();
                     for (Case c : cases) {
                         String rsn = c.getRsn().toLowerCase();
-                        Case old = runewatchCases.get(rsn);
+                        Map<String, Case> sourceCases = (c.getSource().toLowerCase().equals("wdr")) ? wdrCases : rwCases;
+
+                        Case old = sourceCases.get(rsn);
                         // keep the newest case
                         if (old == null || old.getDate().before(c.getDate())) {
-                            runewatchCases.put(rsn, c);
+                            sourceCases.put(rsn, c);
                         }
                     }
-                    log.info("saved {}/{} runewatch cases", runewatchCases.size(), cases.size());
+                    log.info("saved {}/{} rw cases", rwCases.size(), cases.size());
+                    log.info("saved {}/{} wdr cases", wdrCases.size(), cases.size());
                     if (onComplete != null) {
                         clientThread.invokeLater(onComplete);
                     }
@@ -90,7 +108,22 @@ public class CaseManager {
      * @return
      */
     public Case get(String rsn) {
-        return runewatchCases.get(Text.removeTags(Text.toJagexName(rsn)).toLowerCase());
+        String cleanRsn = Text.removeTags(Text.toJagexName(rsn)).toLowerCase();
+        if (config.useRW()) {
+            Case c = rwCases.get(cleanRsn);
+            if (c != null) {
+                return c;
+            }
+        }
+
+        if (config.useWDR()) {
+            Case c = wdrCases.get(cleanRsn);
+            if (c != null) {
+                return c;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -121,12 +154,15 @@ public class CaseManager {
                     log.debug("got runewatch case for {} {}", cleanRsn, cases.size());
                     // get the latest case
                     cases.sort(Comparator.comparing(Case::getDate));
-                    Case rwCase = (cases.size() <= 0) ? null : cases.get(cases.size() - 1);
+
+                    // load from cache if not able to find in single api call
+                    final Case rwCase = (cases.size() <= 0) ? get(cleanRsn) : cases.get(cases.size() - 1);
                     if (rwCase != null) {
-                        runewatchCases.put(cleanRsn, rwCase);
-                    } else {
-                        // case where an appeal process was successful
-                        runewatchCases.remove(cleanRsn);
+                        if (rwCase.isRW()) {
+                            rwCases.put(cleanRsn, rwCase);
+                        } else {
+                            wdrCases.put(cleanRsn, rwCase);
+                        }
                     }
 
                     if (onComplete != null) {
@@ -141,7 +177,11 @@ public class CaseManager {
     }
 
     @VisibleForDevtools
-    void put(String rsn) {
-        runewatchCases.put(rsn.toLowerCase(), new Case(rsn, new Date(), "aaa", "debugging", "3"));
+    void put(String rsn, String source) {
+        if (source.toLowerCase().equals("rw")) {
+            rwCases.put(rsn.toLowerCase(), new Case(rsn, new Date(), "aaa", "debugging", "3", source));
+        } else {
+            wdrCases.put(rsn.toLowerCase(), new Case(rsn, new Date(), "aaa", "debugging", "3", source));
+        }
     }
 }
