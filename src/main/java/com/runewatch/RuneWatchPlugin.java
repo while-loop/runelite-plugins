@@ -417,15 +417,19 @@ public class RuneWatchPlugin extends Plugin {
         Image image = tradeImage;
 
         // Draw the game onto the screenshot off of the game thread
-        executor.submit(() -> {
-            BufferedImage screenshot = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-            Graphics graphics = screenshot.getGraphics();
-            int gameOffsetX = 0;
-            int gameOffsetY = 0;
+        if (config.screenshotTrades()) {
+            executor.submit(() -> {
+                BufferedImage screenshot = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                Graphics graphics = screenshot.getGraphics();
+                int gameOffsetX = 0;
+                int gameOffsetY = 0;
 
-            graphics.drawImage(image, gameOffsetX, gameOffsetY, null);
-            imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, true, NEITHER);
-        });
+                graphics.drawImage(image, gameOffsetX, gameOffsetY, null);
+                imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, config.notifyWhenScreenshotTaken(), NEITHER);
+            });
+        } else {
+            clearScreenshot();
+        }
     }
 
     private void showTradeWarning(int groupId) {
