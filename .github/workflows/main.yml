@@ -1,0 +1,16 @@
+name: Update Watchlist
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run a one-line script
+        run: |
+          apt update && apt install git
+          git checkout runewatch
+          bash scripts/update_watchlist.sh
