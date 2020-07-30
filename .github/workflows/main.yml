@@ -12,5 +12,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run a one-line script
         run: |
-          git checkout runewatch
+          git checkout --track origin/runewatch
           bash scripts/update_watchlist.sh
