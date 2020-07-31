@@ -1,2 +1,2 @@
 # Example
-An example greeter plugin
+An example greeter pluginn
