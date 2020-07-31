@@ -1,6 +1,7 @@
 name: Update Watchlist
 
 on:
+  workflow_dispatch: {}
   schedule:
     # run every 5 minutes. GitHub accepts time > 5 mins.
     # https://github.blog/changelog/2019-11-01-github-actions-scheduled-jobs-maximum-frequency-is-changing/
