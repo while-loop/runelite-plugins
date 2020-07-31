@@ -2,7 +2,7 @@ name: Update Watchlist
 
 on:
   push:
-    branches: [ master, runewatch ]
+    branches: [ master ]
   workflow_dispatch: {}
   schedule:
     # run every 5 minutes. GitHub accepts time > 5 mins.
