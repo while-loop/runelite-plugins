@@ -6,7 +6,7 @@ Check if players have been reported to the RuneWatch database
 Features
 -----------
 
-- Sync RuneWatch's watchlist every 30mins
+- Sync RuneWatch & We Do Raids watchlist every 15mins
 - Right-click `Investigate` players in menu tabs
 - Right-click `Investigate` player models
 - `::rw rsn` command for search capabilities
