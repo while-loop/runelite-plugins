@@ -373,7 +373,7 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
-    @Schedule(period = 30, unit = ChronoUnit.MINUTES)
+    @Schedule(period = 15, unit = ChronoUnit.MINUTES)
     public void refreshList() {
         caseManager.refresh(this::colorAll);
     }

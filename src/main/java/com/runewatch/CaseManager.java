@@ -6,12 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.annotations.VisibleForDevtools;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.util.Text;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,9 +27,9 @@ import java.util.function.Consumer;
 @Slf4j
 @Singleton
 public class CaseManager {
+    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://while-loop.github.io/runelite-plugins/mixedlist.json");
+
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://www.runewatch.com/api/cases/mixedlist");
-    private static final HttpUrl RUNEWATCH_CASES_URL = HttpUrl.parse("https://www.runewatch.com/api/cases");
     final Gson GSON = new GsonBuilder().registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
         try {
             // Allow handling of the occasional empty string as a date.
@@ -52,9 +47,16 @@ public class CaseManager {
     private final ClientThread clientThread;
     private final RuneWatchConfig config;
 
+    Interceptor NO_CACHE = chain -> {
+        Request request = chain.request();
+        Request.Builder builder = request.newBuilder().addHeader("Cache-Control", "no-cache");
+        request = builder.build();
+        return chain.proceed(request);
+    };
+
     @Inject
     private CaseManager(OkHttpClient client, ClientThread clientThread, RuneWatchConfig config) {
-        this.client = client;
+        this.client = client.newBuilder().addInterceptor(NO_CACHE).build();
         this.clientThread = clientThread;
         this.config = config;
     }
@@ -75,26 +77,30 @@ public class CaseManager {
             @Override
             public void onResponse(Call call, Response response) {
                 try {
-                    List<Case> cases = GSON.fromJson(new InputStreamReader(response.body().byteStream()), typeToken);
-                    rwCases.clear();
-                    wdrCases.clear();
-                    for (Case c : cases) {
-                        String rsn = c.getRsn().toLowerCase();
-                        Map<String, Case> sourceCases = (c.getSource().toLowerCase().equals("wdr")) ? wdrCases : rwCases;
+                    if (response.code() < 200 || response.code() >= 400) {
+                        log.error("failed to get watchlist. status: {}", response.code());
+                    } else {
+                        List<Case> cases = GSON.fromJson(new InputStreamReader(response.body().byteStream()), typeToken);
+                        rwCases.clear();
+                        wdrCases.clear();
+                        for (Case c : cases) {
+                            String rsn = c.getRsn().toLowerCase();
+                            Map<String, Case> sourceCases = (c.getSource().toLowerCase().equals("wdr")) ? wdrCases : rwCases;
 
-                        Case old = sourceCases.get(rsn);
-                        // keep the newest case
-                        if (old == null || old.getDate().before(c.getDate())) {
-                            sourceCases.put(rsn, c);
+                            Case old = sourceCases.get(rsn);
+                            // keep the newest case
+                            if (old == null || old.getDate().before(c.getDate())) {
+                                sourceCases.put(rsn, c);
+                            }
                         }
-                    }
-                    log.info("saved {}/{} rw cases", rwCases.size(), cases.size());
-                    log.info("saved {}/{} wdr cases", wdrCases.size(), cases.size());
-                    if (onComplete != null) {
-                        clientThread.invokeLater(onComplete);
+                        log.debug("saved {}/{} rw cases", rwCases.size(), cases.size());
+                        log.debug("saved {}/{} wdr cases", wdrCases.size(), cases.size());
                     }
                 } finally {
                     response.close();
+                    if (onComplete != null) {
+                        clientThread.invokeLater(onComplete);
+                    }
                 }
 
             }
@@ -134,46 +140,7 @@ public class CaseManager {
      * @return
      */
     public void get(String rsn, Consumer<Case> onComplete) {
-        final String cleanRsn = Text.removeTags(Text.toJagexName(rsn)).toLowerCase();
-        Request req = new Request.Builder().url(RUNEWATCH_CASES_URL.newBuilder().addPathSegment(cleanRsn).build()).build();
-
-        // call on background thread
-        client.newCall(req).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                log.error("failed to get runewatch case for {}: {}", cleanRsn, e.toString());
-                if (onComplete != null) {
-                    clientThread.invokeLater(() -> onComplete.accept(null));
-                }
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) {
-                try {
-                    List<Case> cases = GSON.fromJson(new InputStreamReader(response.body().byteStream()), typeToken);
-                    log.debug("got runewatch case for {} {}", cleanRsn, cases.size());
-                    // get the latest case
-                    cases.sort(Comparator.comparing(Case::getDate));
-
-                    // load from cache if not able to find in single api call
-                    final Case rwCase = (cases.size() <= 0) ? get(cleanRsn) : cases.get(cases.size() - 1);
-                    if (rwCase != null) {
-                        if (rwCase.isRW()) {
-                            rwCases.put(cleanRsn, rwCase);
-                        } else {
-                            wdrCases.put(cleanRsn, rwCase);
-                        }
-                    }
-
-                    if (onComplete != null) {
-                        clientThread.invokeLater(() -> onComplete.accept(rwCase));
-                    }
-                } finally {
-                    response.close();
-                }
-
-            }
-        });
+        refresh(() -> onComplete.accept(get(rsn)));
     }
 
     @VisibleForDevtools
