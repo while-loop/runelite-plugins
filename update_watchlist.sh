@@ -34,6 +34,6 @@ git config --local user.name RW-Updater
 git config --local user.email "rw-updater@runewatch.com"
 git add ${MIXEDLIST_FILE}
 git commit -m "[${cur_datetime}] watchlist update"
-git push origin runewatch
+git push origin gh-pages
 
 echo "[INFO] Watchlist successfully updated"
