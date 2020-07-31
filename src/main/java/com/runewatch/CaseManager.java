@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Singleton
 public class CaseManager {
-    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://while-loop.github.io/runelite-plugins/mixedlist.json");
+    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://raw.githubusercontent.com/while-loop/runelite-plugins/runewatch/data/mixedlist.json");
 
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     final Gson GSON = new GsonBuilder().registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
@@ -47,16 +47,9 @@ public class CaseManager {
     private final ClientThread clientThread;
     private final RuneWatchConfig config;
 
-    Interceptor NO_CACHE = chain -> {
-        Request request = chain.request();
-        Request.Builder builder = request.newBuilder().addHeader("Cache-Control", "no-cache");
-        request = builder.build();
-        return chain.proceed(request);
-    };
-
     @Inject
     private CaseManager(OkHttpClient client, ClientThread clientThread, RuneWatchConfig config) {
-        this.client = client.newBuilder().addInterceptor(NO_CACHE).build();
+        this.client = client;
         this.clientThread = clientThread;
         this.config = config;
     }
