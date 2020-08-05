@@ -12,7 +12,11 @@ status_code=`curl \
       https://www.runewatch.com/api/cases/mixedlist \
       --output ${MIXEDLIST_FILE} 2> /dev/null`
 
-if [[ ${status_code} != 200 ]]; then
+# make code 500 exit 0 to reduce email spam when runewatch is down 
+if [[ ${status_code} == 500 || ${status_code} == 502 ]]; then
+  echo "[ERROR] RuneWatch returned 500 status code"
+  exit 0
+elif [[ ${status_code} != 200 ]]; then
   echo "[ERROR] RuneWatch returned non-200 status code: ${status_code}"
   exit 1
 fi
