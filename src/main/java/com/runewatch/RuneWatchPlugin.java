@@ -248,8 +248,11 @@ public class RuneWatchPlugin extends Plugin {
             return;
         }
 
-        if (option.equals("Message") && groupId == WidgetInfo.FRIENDS_LIST.getGroupId()) {
-            return;
+        for (MenuEntry me : client.getMenuEntries()) {
+            // don't add menu option if we've already added investigate
+            if (INVESTIGATE.equals(me.getOption())) {
+                return;
+            }
         }
 
         final MenuEntry lookup = new MenuEntry();
