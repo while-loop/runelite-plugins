@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MIXEDLIST_FILE=../data/mixedlist.json
+MIXEDLIST_FILE=mixedlist.json
 SCRIPTS_DIR=$(realpath $(dirname $0))
 cd ${SCRIPTS_DIR}
 
@@ -39,6 +39,6 @@ git config --local user.name RW-Updater
 git config --local user.email "rw-updater@runewatch.com"
 git add ${MIXEDLIST_FILE}
 git commit -m "[${cur_datetime}] watchlist update"
-git push origin runewatch
+git push origin runewatch-updater
 
 echo "[INFO] Watchlist successfully updated"
