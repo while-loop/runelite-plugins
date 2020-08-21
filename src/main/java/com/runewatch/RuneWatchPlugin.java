@@ -381,13 +381,13 @@ public class RuneWatchPlugin extends Plugin {
     @Subscribe
     public void onCommandExecuted(CommandExecuted ce) {
         if (developerMode && ce.getCommand().equals("rwd")) {
-            caseManager.refresh(()-> {
+            caseManager.refresh(() -> {
                 if (ce.getArguments().length > 0) {
                     // refresh is async, so wait a bit before adding the test rsn
                     caseManager.put(
                             String.join(" ", Arrays.copyOfRange(ce.getArguments(), 1, ce.getArguments().length)),
                             ce.getArguments()[0].toUpperCase()
-                            );
+                    );
                 }
                 colorAll();
             });
@@ -430,7 +430,7 @@ public class RuneWatchPlugin extends Plugin {
                 int gameOffsetY = 0;
 
                 graphics.drawImage(image, gameOffsetX, gameOffsetY, null);
-                imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, config.notifyWhenScreenshotTaken(), NEITHER);
+                imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, config.notifyWhenScreenshotTaken(), config.uploadTradeScreenshot());
             });
         } else {
             clearScreenshot();

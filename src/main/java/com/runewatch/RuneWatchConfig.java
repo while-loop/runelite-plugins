@@ -4,6 +4,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.runelite.client.util.ImageUploadStyle;
 
 import java.awt.*;
 
@@ -40,6 +41,17 @@ public interface RuneWatchConfig extends Config {
     )
     default boolean notifyWhenScreenshotTaken() {
         return true;
+    }
+
+    @ConfigItem(
+            position = 2,
+            keyName = "uploadTradeScreenshot",
+            name = "Upload",
+            description = "Configures whether or not screenshots are uploaded to Imgur, or placed on your clipboard",
+            section = SCREENSHOT_SECTION
+    )
+    default ImageUploadStyle uploadTradeScreenshot() {
+        return ImageUploadStyle.NEITHER;
     }
 
     @ConfigSection(
