@@ -502,7 +502,7 @@ public class RuneWatchPlugin extends Plugin {
                     .append(String.format(" is on %s list for ", rwCase.niceSourcePossessive()))
                     .append(ChatColorType.HIGHLIGHT)
                     .append(rwCase.getReason())
-                    .append(String.format(" (%s) ", rwCase.getRating()))
+                    .append(" ")
                     .append(ChatColorType.NORMAL)
                     .append("on " + rwCase.niceDate())
                     .append(".");
