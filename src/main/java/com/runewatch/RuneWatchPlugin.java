@@ -8,22 +8,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.MenuAction;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.ScriptID;
-import net.runelite.api.SpriteID;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.FriendsChatMemberJoined;
-import net.runelite.api.events.CommandExecuted;
-import net.runelite.api.events.FocusChanged;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.PlayerMenuOptionClicked;
-import net.runelite.api.events.ScriptPostFired;
-import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.*;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
@@ -55,11 +41,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static net.runelite.client.util.ImageUploadStyle.NEITHER;
 
 @Slf4j
 @PluginDescriptor(
@@ -269,13 +252,6 @@ public class RuneWatchPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onPlayerMenuOptionClicked(PlayerMenuOptionClicked event) {
-        if (event.getMenuOption().equals(INVESTIGATE)) {
-            caseManager.get(event.getMenuTarget(), (rwCase) -> alertPlayerWarning(event.getMenuTarget(), true, false));
-        }
-    }
-
-    @Subscribe
     public void onScriptPostFired(ScriptPostFired event) {
         Runnable color = null;
         switch (event.getScriptId()) {
@@ -323,14 +299,35 @@ public class RuneWatchPlugin extends Plugin {
     public void onMenuOptionClicked(MenuOptionClicked event) {
         int groupId = WidgetInfo.TO_GROUP(event.getWidgetId());
         String option = event.getMenuOption();
+        MenuAction action = event.getMenuAction();
 
-        if (!TRADE_SCREEN_GROUP_IDS.contains(groupId)) {
-            return;
+        if (TRADE_SCREEN_GROUP_IDS.contains(groupId)) {
+            if (option.equals(DECLINE_MSG)) {
+                clearScreenshot();
+            }
         }
 
-        if (option.equals(DECLINE_MSG)) {
-            clearScreenshot();
+        // https://github.com/runelite/runelite/blob/f6c68eefc8a3c5415451bdbd6190b1f745ed5489/runelite-client/src/main/java/net/runelite/client/plugins/hiscore/HiscorePlugin.java#L178
+        if ((action == MenuAction.RUNELITE || action == MenuAction.RUNELITE_PLAYER) && option.equals(INVESTIGATE)) {
+            final String target;
+            if (action == MenuAction.RUNELITE_PLAYER) {
+                // The player id is included in the event, so we can use that to get the player name,
+                // which avoids having to parse out the combat level and any icons preceding the name.
+                Player player = client.getCachedPlayers()[event.getId()];
+                if (player != null) {
+                    target = player.getName();
+                } else {
+                    target = null;
+                }
+            } else {
+                target = Text.removeTags(event.getMenuTarget());
+            }
+
+            if (target != null) {
+                caseManager.get(event.getMenuTarget(), (rwCase) -> alertPlayerWarning(target, true, false));
+            }
         }
+
     }
 
     @Subscribe
