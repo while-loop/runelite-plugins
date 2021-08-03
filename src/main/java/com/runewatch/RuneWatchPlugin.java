@@ -64,7 +64,7 @@ public class RuneWatchPlugin extends Plugin {
     private static final Pattern TRADING_WITH_PATTERN = Pattern.compile("Trading [W|w]ith:(<br>|\\s)(.*)");
     private static final Pattern NEW_PLAYER_JOIN_CLAN = Pattern.compile("(|\\s)(.*) has been invited into the clan by (|\\s)(.*).");
 
-	private static final int PLAYER_TRADE_OFFER_GROUP_ID = 335;
+    private static final int PLAYER_TRADE_OFFER_GROUP_ID = 335;
     private static final int PLAYER_TRADE_OFFER_TRADING_WITH = 31;
     private static final int PLAYER_TRADE_OFFER_TRADE_MODIFIED_ME = 26;
     private static final int PLAYER_TRADE_OFFER_TRADE_MODIFIED_THEM = 29;
@@ -96,7 +96,7 @@ public class RuneWatchPlugin extends Plugin {
             WidgetInfo.IGNORE_LIST.getGroupId(),
             COX_PARTY_DETAILS_GROUP_ID,
             TOB_PARTY_DETAILS_GROUP_ID,
-			WidgetInfo.CLAN_MEMBER_LIST.getGroupId()
+            WidgetInfo.CLAN_MEMBER_LIST.getGroupId()
     );
 
     private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(
@@ -209,9 +209,9 @@ public class RuneWatchPlugin extends Plugin {
     private void colorAll() {
         clientThread.invokeLater(() -> {
             colorFriendsChat();
-			colorClanChat();
-			colorGuestClanChat();
-			
+            colorClanChat();
+            colorGuestClanChat();
+
             colorRaidsSidePanel();
             colorRaidsPartyList();
             colorRaidsParty();
@@ -364,29 +364,27 @@ public class RuneWatchPlugin extends Plugin {
     @Subscribe
     public void onChatMessage(ChatMessage event) {
 
-		ChatMessageType chatType =  event.getType();
+        ChatMessageType chatType = event.getType();
 
-    	if(chatType == ChatMessageType.CLAN_MESSAGE && config.notifyOnJoin()){
-    		String msg = event.getMessage();
-			Matcher m = NEW_PLAYER_JOIN_CLAN.matcher(msg);
-			if (m.matches()) {
-				String newClanMateRsn = m.group(2);
-				caseManager.get(newClanMateRsn, (rwCase) -> alertPlayerWarning(newClanMateRsn, true, false));
-			}
-		}
+        if (chatType == ChatMessageType.CLAN_MESSAGE && config.notifyOnJoin()) {
+            String msg = event.getMessage();
+            Matcher m = NEW_PLAYER_JOIN_CLAN.matcher(msg);
+            if (m.matches()) {
+                String newClanMateRsn = m.group(2);
+                caseManager.get(newClanMateRsn, (rwCase) -> alertPlayerWarning(newClanMateRsn, true, false));
+            }
+        }
 
-        if (chatType == ChatMessageType.TRADE )
-		{
-			String msg = event.getMessage();
-			switch (msg)
-			{
-				case ACCEPTED_TRADE_MSG:
-					saveScreenshot();
-					break;
-				case DECLINED_TRADE_MSG:
-					clearScreenshot();
-			}
-		}
+        if (chatType == ChatMessageType.TRADE) {
+            String msg = event.getMessage();
+            switch (msg) {
+                case ACCEPTED_TRADE_MSG:
+                    saveScreenshot();
+                    break;
+                case DECLINED_TRADE_MSG:
+                    clearScreenshot();
+            }
+        }
     }
 
     @Schedule(period = 15, unit = ChronoUnit.MINUTES)
@@ -533,44 +531,41 @@ public class RuneWatchPlugin extends Plugin {
     private void colorFriendsChat() {
         Widget ccList = client.getWidget(WidgetInfo.FRIENDS_CHAT_LIST);
         if (ccList != null) {
-			illiteratePlayerWidgets(ccList);
+            illiteratePlayerWidgets(ccList);
         }
     }
 
-    private void colorClanChat(){
-    	Widget clanChatList = client.getWidget(WidgetInfo.CLAN_MEMBER_LIST);
-    	if (clanChatList != null)
-    	{
-			illiteratePlayerWidgets(clanChatList);
-		}
-	}
+    private void colorClanChat() {
+        Widget clanChatList = client.getWidget(WidgetInfo.CLAN_MEMBER_LIST);
+        if (clanChatList != null) {
+            illiteratePlayerWidgets(clanChatList);
+        }
+    }
 
-	private void colorGuestClanChat(){
-		Widget guestClanChatList = client.getWidget(WidgetInfo.CLAN_MEMBER_LIST);
-		if (guestClanChatList != null)
-		{
-			illiteratePlayerWidgets(guestClanChatList);
-		}
-	}
+    private void colorGuestClanChat() {
+        Widget guestClanChatList = client.getWidget(WidgetInfo.CLAN_MEMBER_LIST);
+        if (guestClanChatList != null) {
+            illiteratePlayerWidgets(guestClanChatList);
+        }
+    }
 
-	private void illiteratePlayerWidgets(Widget chatWidget)
-	{
-		Widget[] players = chatWidget.getDynamicChildren();
-		for (int i = 0; i < players.length; i += 3) {
-			Widget player = players[i];
-			if (player == null) {
-				continue;
-			}
+    private void illiteratePlayerWidgets(Widget chatWidget) {
+        Widget[] players = chatWidget.getDynamicChildren();
+        for (int i = 0; i < players.length; i += 3) {
+            Widget player = players[i];
+            if (player == null) {
+                continue;
+            }
 
-			Case rwCase = caseManager.get(player.getText());
-			if (rwCase == null) {
-				continue;
-			}
+            Case rwCase = caseManager.get(player.getText());
+            if (rwCase == null) {
+                continue;
+            }
 
-			player.setTextColor(config.playerTextColor().getRGB());
-			player.revalidate();
-		}
-	}
+            player.setTextColor(config.playerTextColor().getRGB());
+            player.revalidate();
+        }
+    }
 
     private void colorRaidsSidePanel() {
         Widget raidsList = client.getWidget(WidgetID.RAIDING_PARTY_GROUP_ID, 10);
