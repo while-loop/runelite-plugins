@@ -89,14 +89,18 @@ public class RuneWatchPlugin extends Plugin {
 
     private static final List<Integer> MENU_WIDGET_IDS = ImmutableList.of(
             WidgetInfo.FRIENDS_LIST.getGroupId(),
-            WidgetInfo.FRIENDS_CHAT.getGroupId(),
-            WidgetInfo.CHATBOX.getGroupId(),
-            WidgetInfo.RAIDING_PARTY.getGroupId(),
-            WidgetInfo.PRIVATE_CHAT_MESSAGE.getGroupId(),
             WidgetInfo.IGNORE_LIST.getGroupId(),
+
+            WidgetInfo.CHATBOX.getGroupId(),
+            WidgetInfo.FRIENDS_CHAT.getGroupId(),
+            WidgetInfo.PRIVATE_CHAT_MESSAGE.getGroupId(),
+
+            WidgetInfo.RAIDING_PARTY.getGroupId(),
             COX_PARTY_DETAILS_GROUP_ID,
             TOB_PARTY_DETAILS_GROUP_ID,
-            WidgetInfo.CLAN_MEMBER_LIST.getGroupId()
+
+            WidgetInfo.CLAN_MEMBER_LIST.getGroupId(),
+            WidgetInfo.CLAN_GUEST_MEMBER_LIST.getGroupId()
     );
 
     private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(
@@ -242,17 +246,14 @@ public class RuneWatchPlugin extends Plugin {
             }
         }
 
-        final MenuEntry lookup = new MenuEntry();
-        lookup.setOption(INVESTIGATE);
-        lookup.setTarget(event.getTarget());
-        lookup.setType(MenuAction.RUNELITE.getId());
-        lookup.setParam0(event.getActionParam0());
-        lookup.setParam1(event.getActionParam1());
-        lookup.setIdentifier(event.getIdentifier());
 
-        MenuEntry[] newMenu = ObjectArrays.concat(client.getMenuEntries(), lookup);
-        ArrayUtils.swap(newMenu, newMenu.length - 1, newMenu.length - 2);
-        client.setMenuEntries(newMenu);
+        client.createMenuEntry(-1)
+                .setOption(INVESTIGATE)
+                .setTarget(event.getTarget())
+                .setType(MenuAction.RUNELITE)
+                .setParam0(event.getActionParam0())
+                .setParam1(event.getActionParam1())
+                .setIdentifier(event.getIdentifier());
     }
 
     @Subscribe
