@@ -109,7 +109,6 @@ public class TimeToLevelPlugin extends Plugin {
                 rate = rateMethod;
             }
             if (rate == null || rate.rate <= 0) {
-                log.error("no rate {}", skill);
                 continue;
             }
 
