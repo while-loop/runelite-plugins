@@ -10,7 +10,8 @@ Features
 - Right-click `Investigate` players in menu tabs
 - Right-click `Investigate` player models
 - `::rw rsn` command for search capabilities
-- Notify user when a player on the watchlist joins the cc
+- Notify user when a player on the watchlist joins the clan chat/friends chat you're in
+- Notify user when a player nearby is on the watch list
 - Add warning to trade windows if user is on watchlist
 - Take screenshots of all accepted trades (stored in `~/.runelite/screenshots/<rsn>/Trades`)
 - Tob & CoX Party coloring

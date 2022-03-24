@@ -105,20 +105,31 @@ public interface RuneWatchConfig extends Config {
     }
 
     @ConfigSection(
-            name = "Friends Chat",
-            description = "All the options notifying friends/clan chat",
+            name = "Notifications",
+            description = "All the notification options",
             position = 70
     )
-    String CHAT_SECTION = "Friends Chat";
+    String NOTIFICATIONS_SECTION = "Notifications";
 
     @ConfigItem(
             position = 7,
             keyName = "notifyOnJoin",
             name = "Alert On Join",
             description = "Send an alert message when a player on the watchlist enters a Clan/Friends Chat",
-            section = CHAT_SECTION
+            section = NOTIFICATIONS_SECTION
     )
     default boolean notifyOnJoin() {
+        return true;
+    }
+
+    @ConfigItem(
+            position = 8,
+            keyName = "notifyOnNearby",
+            name = "Alert On Nearby",
+            description = "Send an alert message when you're nearby a player on the watch list",
+            section = NOTIFICATIONS_SECTION
+    )
+    default boolean notifyOnNearby() {
         return true;
     }
 
@@ -130,7 +141,7 @@ public interface RuneWatchConfig extends Config {
     String SOURCES_SECTION = "Sources";
 
     @ConfigItem(
-            position = 8,
+            position = 9,
             keyName = "useRW",
             name = "Use RuneWatch",
             description = "Check for reported players against the RuneWatch watchlist",
@@ -141,7 +152,7 @@ public interface RuneWatchConfig extends Config {
     }
 
     @ConfigItem(
-            position = 9,
+            position = 10,
             keyName = "useWDR",
             name = "Use We Do Raids",
             description = "Check for reported players against the We Do Raids banlist",
