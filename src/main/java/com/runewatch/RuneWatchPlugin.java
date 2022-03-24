@@ -62,7 +62,6 @@ public class RuneWatchPlugin extends Plugin {
     private static final String DECLINE_MSG = "Decline";
 
     private static final Pattern TRADING_WITH_PATTERN = Pattern.compile("Trading [W|w]ith:(<br>|\\s)(.*)");
-    private static final Pattern NEW_PLAYER_JOIN_CLAN = Pattern.compile("(|\\s)(.*) has been invited into the clan by (|\\s)(.*).");
 
     private static final int PLAYER_TRADE_OFFER_GROUP_ID = 335;
     private static final int PLAYER_TRADE_OFFER_TRADING_WITH = 31;
@@ -106,6 +105,23 @@ public class RuneWatchPlugin extends Plugin {
     private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(
             "Message", "Add ignore", "Remove friend", "Delete", "Kick", "Reject"
     );
+
+    private enum AlertType {
+        NONE(""),
+        FRIENDS_CHAT("Friends chat member, "),
+        CLAN_CHAT("Clan chat member, "),
+        NEARBY("Nearby player, ");
+
+        private final String message;
+
+        AlertType(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
 
     @Inject
     private Client client;
@@ -227,6 +243,15 @@ public class RuneWatchPlugin extends Plugin {
     }
 
     @Subscribe
+    public void onPlayerSpawned(PlayerSpawned playerSpawned) {
+        if (!config.notifyOnNearby()) {
+            return;
+        }
+        String name = playerSpawned.getPlayer().getName();
+        this.alertPlayerWarning(name, false, AlertType.NEARBY);
+    }
+
+    @Subscribe
     public void onMenuEntryAdded(MenuEntryAdded event) {
         if (!config.menuOption() || (!hotKeyPressed && config.useHotkey())) {
             return;
@@ -289,15 +314,30 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onFriendsChatMemberJoined(FriendsChatMemberJoined event) {
-        if (config.notifyOnJoin()) {
-            String rsn = Text.toJagexName(event.getMember().getName());
-            String local = client.getLocalPlayer().getName();
-            if (rsn.equals(local)) {
-                return;
-            }
-
-            alertPlayerWarning(rsn, false, true);
+        if (!config.notifyOnJoin()) {
+            return;
         }
+        String rsn = Text.toJagexName(event.getMember().getName());
+        String local = client.getLocalPlayer().getName();
+        if (rsn.equals(local)) {
+            return;
+        }
+
+        alertPlayerWarning(rsn, false, AlertType.FRIENDS_CHAT);
+    }
+
+    @Subscribe
+    public void onClanMemberJoined(ClanMemberJoined event) {
+        if (!config.notifyOnJoin()) {
+            return;
+        }
+        String rsn = Text.toJagexName(event.getClanMember().getName());
+        String local = client.getLocalPlayer().getName();
+        if (rsn.equals(local)) {
+            return;
+        }
+
+        alertPlayerWarning(rsn, false, AlertType.CLAN_CHAT);
     }
 
     @Subscribe
@@ -329,7 +369,7 @@ public class RuneWatchPlugin extends Plugin {
             }
 
             if (target != null) {
-                caseManager.get(event.getMenuTarget(), (rwCase) -> alertPlayerWarning(target, true, false));
+                caseManager.get(event.getMenuTarget(), (rwCase) -> alertPlayerWarning(target, true, AlertType.NONE));
             }
         }
 
@@ -366,16 +406,6 @@ public class RuneWatchPlugin extends Plugin {
     public void onChatMessage(ChatMessage event) {
 
         ChatMessageType chatType = event.getType();
-
-        if (chatType == ChatMessageType.CLAN_MESSAGE && config.notifyOnJoin()) {
-            String msg = event.getMessage();
-            Matcher m = NEW_PLAYER_JOIN_CLAN.matcher(msg);
-            if (m.matches()) {
-                String newClanMateRsn = m.group(2);
-                caseManager.get(newClanMateRsn, (rwCase) -> alertPlayerWarning(newClanMateRsn, true, false));
-            }
-        }
-
         if (chatType == ChatMessageType.TRADE) {
             String msg = event.getMessage();
             switch (msg) {
@@ -408,7 +438,7 @@ public class RuneWatchPlugin extends Plugin {
             });
         } else if (ce.getCommand().equals("rw")) {
             final String rsn = String.join(" ", ce.getArguments());
-            caseManager.get(rsn, (c) -> alertPlayerWarning(rsn, true, false));
+            caseManager.get(rsn, (c) -> alertPlayerWarning(rsn, true, AlertType.NONE));
         }
     }
 
@@ -497,14 +527,12 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
-    private void alertPlayerWarning(String rsn, boolean notifyClear, boolean fc) {
+    private void alertPlayerWarning(String rsn, boolean notifyClear, AlertType alertType) {
         rsn = Text.toJagexName(rsn);
         Case rwCase = caseManager.get(rsn);
         ChatMessageBuilder response = new ChatMessageBuilder();
-        if (fc) {
-            response.append("Friends chat member, ");
-        }
-        response.append(ChatColorType.HIGHLIGHT)
+        response.append(alertType.getMessage())
+                .append(ChatColorType.HIGHLIGHT)
                 .append(rsn)
                 .append(ChatColorType.NORMAL);
 
