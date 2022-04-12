@@ -541,14 +541,18 @@ public class RuneWatchPlugin extends Plugin {
         } else if (rwCase == null) {
             response.append(" is not on any watchlist.");
         } else {
-            response
-                    .append(String.format(" is on %s list for ", rwCase.niceSourcePossessive()))
+            response.append(String.format(" is on %s list for ", rwCase.niceSourcePossessive()))
                     .append(ChatColorType.HIGHLIGHT)
-                    .append(rwCase.getReason())
-                    .append(" ")
-                    .append(ChatColorType.NORMAL)
-                    .append("on " + rwCase.niceDate())
-                    .append(".");
+                    .append(rwCase.getReason());
+            if (rwCase.getDate().getTime() > 0) {
+                response.append(" ")
+                        .append(ChatColorType.NORMAL)
+                        .append("on " + rwCase.niceDate())
+                        .append(".");
+            } else {
+                response.append(ChatColorType.NORMAL)
+                        .append(".");
+            }
         }
 
         chatMessageManager.queue(QueuedMessage.builder()
