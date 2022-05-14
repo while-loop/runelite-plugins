@@ -11,7 +11,8 @@ public interface ZulrahHelperConfig extends Config {
             keyName = ZulrahHelperPlugin.DISPLAY_PRAYER_KEY,
             name = "Prayer Icons",
             description = "Set phase images to use prayer icons, " +
-                    "denoting if prayer can be turned on/off",
+                    "denoting what overhead prayer to use per phase. " +
+                    "no prayer icon means the phase is safe to turn overheads off.",
             position = 0
     )
     default boolean displayPrayerIcons() { return true; }
