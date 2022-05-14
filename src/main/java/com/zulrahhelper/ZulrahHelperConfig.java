@@ -8,9 +8,18 @@ import net.runelite.client.config.Keybind;
 @ConfigGroup(ZulrahHelperPlugin.CONFIG_GROUP)
 public interface ZulrahHelperConfig extends Config {
     @ConfigItem(
+            keyName = ZulrahHelperPlugin.DISPLAY_PRAYER_KEY,
+            name = "Prayer Icons",
+            description = "Set phase images to use prayer icons, " +
+                    "denoting what overhead prayer to use per phase. " +
+                    "no prayer icon means the phase is safe to turn overheads off.",
+            position = 0
+    )
+    default boolean displayPrayerIcons() { return true; }
+    @ConfigItem(
             keyName = ZulrahHelperPlugin.DARK_MODE_KEY,
             name = "Dark Mode",
-            description = "Set phases phase images to dark mode",
+            description = "Set phase images to dark mode",
             position = 1
     )
     default boolean darkMode() {

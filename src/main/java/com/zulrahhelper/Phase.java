@@ -23,17 +23,20 @@ public class Phase {
     public Phase(Rotation rotation, int number) {
         this.rotation = rotation;
         this.number = number;
-        this.lastImgPath = getImgPath(rotation, number, false);
+        this.lastImgPath = getImgPath(rotation, number, false, false);
         this.image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
     }
 
-    private String getImgPath(Rotation rotation, int number, boolean darkMode) {
-        String dark = "";
+    private String getImgPath(Rotation rotation, int number, boolean darkMode, boolean prayerIcons) {
+        String options = "";
         if (darkMode) {
-            dark = "-dark";
+            options += "-dark";
+        }
+        if (prayerIcons){
+            options += "-pray";
         }
 
-        return String.format(IMG_PATH, rotation.name().toLowerCase(), number, dark);
+        return String.format(IMG_PATH, rotation.name().toLowerCase(), number, options);
     }
 
     public Rotation getRotation() {
@@ -75,7 +78,7 @@ public class Phase {
     }
 
     public BufferedImage getImage(ZulrahHelperConfig config) {
-        String currentImgPath = getImgPath(getRotation(), getNumber(), config.darkMode());
+        String currentImgPath = getImgPath(getRotation(), getNumber(), config.darkMode(), config.displayPrayerIcons());
         if (currentImgPath.equals(lastImgPath)) {
             return image;
         }
