@@ -57,6 +57,13 @@ public class ZulrahHelperPlugin extends Plugin {
             ZULRAH_REGION_ID
     );
 
+    private static final List<String> OPTION_KEYS = Arrays.asList(
+            DARK_MODE_KEY,
+            DISPLAY_PRAYER_KEY,
+            DISPLAY_ATTACK_KEY,
+            IMAGE_ORIENTATION_KEY
+    );
+
     @Inject
     private KeyManager keyManager;
 
@@ -110,7 +117,7 @@ public class ZulrahHelperPlugin extends Plugin {
             return;
         }
 
-        if (event.getKey().equals(DARK_MODE_KEY) || event.getKey().equals(IMAGE_ORIENTATION_KEY)) {
+        if (OPTION_KEYS.contains(event.getKey())) {
             panel.update(state);
         }
 

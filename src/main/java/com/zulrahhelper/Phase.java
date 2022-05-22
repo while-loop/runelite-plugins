@@ -3,6 +3,7 @@ package com.zulrahhelper;
 
 import net.runelite.client.util.ImageUtil;
 
+import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
 
 public class Phase {
@@ -23,22 +24,26 @@ public class Phase {
     public Phase(Rotation rotation, int number) {
         this.rotation = rotation;
         this.number = number;
-        this.lastImgPath = getImgPath(rotation, number, false, false, false);
+        this.lastImgPath = getImgPath(rotation, number);
         this.image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
     }
 
-    private String getImgPath(Rotation rotation, int number, boolean darkMode,
-        boolean prayerIcons, boolean attackIcons) {
+    private String getImgPath(Rotation rotation, int number) {
+        return getImgPath(rotation, number, new ImageOptions());
+    }
+
+    private String getImgPath(Rotation rotation, int number, ImageOptions imgOpts) {
         String options = "";
-        if (darkMode) {
+
+        if (imgOpts.isDarkMode()) {
             options += "-dark";
         }
-        if (prayerIcons){
+        if (imgOpts.isPrayerIcons()) {
             options += "-pray";
         }
         // attack versions of files automatically generated at
         // https://github.com/burkeg/OSRS-Hitsplat-Generator/tree/zulrah
-        if (attackIcons){
+        if (imgOpts.isAttackIcons()) {
             options += "-attack";
         }
 
@@ -84,8 +89,7 @@ public class Phase {
     }
 
     public BufferedImage getImage(ZulrahHelperConfig config) {
-        String currentImgPath = getImgPath(getRotation(), getNumber(), config.darkMode(),
-            config.displayPrayerIcons(), config.displayAttackIcons());
+        String currentImgPath = getImgPath(getRotation(), getNumber(), new ImageOptions(config));
         if (currentImgPath.equals(lastImgPath)) {
             return image;
         }

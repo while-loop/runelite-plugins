@@ -35,7 +35,7 @@ public interface ZulrahHelperConfig extends Config {
             position = 0
     )
     default boolean displayPrayerIcons() {
-        return true;
+        return false;
     }
 
     @ConfigItem(
@@ -47,7 +47,7 @@ public interface ZulrahHelperConfig extends Config {
             position = 1
     )
     default boolean displayAttackIcons() {
-        return true;
+        return false;
     }
 
     @ConfigItem(

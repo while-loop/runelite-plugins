@@ -20,11 +20,11 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
     private final ImageIcon phaseIcon;
     private final ImageIcon phaseIconHover;
 
-    ZulrahHelperPhasePanel(ZulrahHelperPlugin plugin, Phase phase, int rows) {
+    ZulrahHelperPhasePanel(ZulrahHelperPlugin plugin, Phase phase, int columns) {
         this.plugin = plugin;
         this.phase = phase;
 
-        BufferedImage img = processImg(phase.getImage(plugin.getConfig()), rows);
+        BufferedImage img = processImg(phase.getImage(plugin.getConfig()), columns);
         phaseIcon = new ImageIcon(img);
         phaseIconHover = new ImageIcon(ImageUtil.luminanceScale(img, .75f));
 
@@ -37,15 +37,16 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
             setBorder(new LineBorder(ColorScheme.PROGRESS_COMPLETE_COLOR));
 
         }
-        if (rows >= 2) {
+        if (columns >= 2) {
             setBorder(new LineBorder(ColorScheme.PROGRESS_INPROGRESS_COLOR));
         }
         add(picLabel);
     }
 
-    private BufferedImage processImg(BufferedImage img, int rows) {
+    private BufferedImage processImg(BufferedImage img, int columns) {
         int size = 95;
-        if (rows >= 3) {
+        // make the images smaller if we're showing more than 3 images on the same row
+        if (columns >= 3) {
             size = 60;
         }
         img = ImageUtil.resizeImage(img, size, size);
