@@ -11,14 +11,16 @@ Config
 
 The config allows to set hotkeys to help advance through rotation selection.
 
-![Config Page](/assets/config.png "Config Page")
+config |
+-------|
+![Config Page](/assets/config.png "Config Page") |
 
 Screenshots
 -----------
 
-![magma](/assets/magma.png "magma")
-![start](/assets/start.png "start")
-![tanz](/assets/tanz.png "tanz")
+start                               | magma                               | tanz                            
+----------------------------------- |-------------------------------------| --------------------------------
+![start](/assets/start.png "start") | ![magma](/assets/magma.png "magma") | ![tanz](/assets/tanz.png "tanz") 
 
 License
 -------
