@@ -47,6 +47,28 @@ public class State {
     }
 
     public List<List<Phase>> buildTree() {
+        List<List<Phase>> tree = getRotationTree();
+        for (List<Phase> phases : tree) {
+            if (phases.size() <= 0) {
+                break;
+            }
+
+            for (Phase p : phases) {
+                p.setStates(this);
+            }
+
+            if (phases.get(0).getNumber() > getNumber() + 1) {
+                if (phases.size() > 1) {
+                    tree = tree.subList(0, tree.indexOf(phases) + 1);
+                    break;
+                }
+            }
+        }
+
+        return tree;
+    }
+
+    public List<List<Phase>> getRotationTree() {
         List<List<Phase>> tree = new ArrayList<>();
         switch (selectedPhase.getRotation()) {
             case START:
@@ -67,24 +89,6 @@ public class State {
             case TANZ:
                 tree = TANZ;
         }
-
-        for (List<Phase> phases : tree) {
-            if (phases.size() <= 0) {
-                break;
-            }
-
-            for (Phase p : phases) {
-                p.setStates(this);
-            }
-
-            if (phases.get(0).getNumber() > getNumber() + 1) {
-                if (phases.size() > 1) {
-                    tree = tree.subList(0, tree.indexOf(phases) + 1);
-                    break;
-                }
-            }
-        }
-
         return tree;
     }
 

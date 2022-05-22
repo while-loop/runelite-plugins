@@ -228,7 +228,7 @@ public class ZulrahHelperPlugin extends Plugin {
         hotkeys[3] = new HotkeyListener(() -> config.nextPhaseHotkey()) {
             @Override
             public void hotkeyPressed() {
-                selectOption(0);
+                setState(state.getRotationTree().get(state.getNumber()).get(0));
             }
         };
 
