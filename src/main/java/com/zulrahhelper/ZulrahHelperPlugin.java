@@ -32,6 +32,10 @@ import java.util.List;
 )
 public class ZulrahHelperPlugin extends Plugin {
     static final String CONFIG_GROUP = "zulrahhelper";
+    static final String SECTION_IMAGE_OPTIONS = "Image Options";
+    static final String SECTION_HOTKEYS = "Hotkeys";
+    static final String SECTION_MISC = "Miscellaneous";
+
     static final String DARK_MODE_KEY = "darkMode";
     static final String DISPLAY_PRAYER_KEY = "displayPrayer";
     static final String DISPLAY_ATTACK_KEY = "displayAttack";
