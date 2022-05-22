@@ -34,6 +34,7 @@ public class ZulrahHelperPlugin extends Plugin {
     static final String CONFIG_GROUP = "zulrahhelper";
     static final String DARK_MODE_KEY = "darkMode";
     static final String DISPLAY_PRAYER_KEY = "displayPrayer";
+    static final String DISPLAY_ATTACK_KEY = "displayAttack";
     static final String IMAGE_ORIENTATION_KEY = "imageOrientation";
     static final String AUTO_HIDE_KEY = "autoHide";
 

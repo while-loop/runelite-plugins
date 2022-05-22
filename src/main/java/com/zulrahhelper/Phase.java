@@ -23,17 +23,23 @@ public class Phase {
     public Phase(Rotation rotation, int number) {
         this.rotation = rotation;
         this.number = number;
-        this.lastImgPath = getImgPath(rotation, number, false, false);
+        this.lastImgPath = getImgPath(rotation, number, false, false, false);
         this.image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
     }
 
-    private String getImgPath(Rotation rotation, int number, boolean darkMode, boolean prayerIcons) {
+    private String getImgPath(Rotation rotation, int number, boolean darkMode,
+        boolean prayerIcons, boolean attackIcons) {
         String options = "";
         if (darkMode) {
             options += "-dark";
         }
         if (prayerIcons){
             options += "-pray";
+        }
+        // attack versions of files automatically generated at
+        // https://github.com/burkeg/OSRS-Hitsplat-Generator/tree/zulrah
+        if (attackIcons){
+            options += "-attack";
         }
 
         return String.format(IMG_PATH, rotation.name().toLowerCase(), number, options);
@@ -78,7 +84,8 @@ public class Phase {
     }
 
     public BufferedImage getImage(ZulrahHelperConfig config) {
-        String currentImgPath = getImgPath(getRotation(), getNumber(), config.darkMode(), config.displayPrayerIcons());
+        String currentImgPath = getImgPath(getRotation(), getNumber(), config.darkMode(),
+            config.displayPrayerIcons(), config.displayAttackIcons());
         if (currentImgPath.equals(lastImgPath)) {
             return image;
         }
