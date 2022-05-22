@@ -24,10 +24,10 @@ public class Phase {
     private final Rotation rotation;
     private final int number;
 
-    // ordered set of prayers. null means no prayer for this phase
+    // ordered set of prayers.
     private final OverheadProtection[] prayers;
 
-    // ordered set of attacks. null means attack does not happen in this phase
+    // ordered set of attacks.
     // 0 - normal
     // 1 - venom
     // 2 - snakeling
@@ -120,17 +120,13 @@ public class Phase {
 
         if (imageOpts.isAttackIcons()) {
             for (Attack attack : attacks) {
-                if (attack != null) {
-                    image = attack.applyToPhase(image);
-                }
+                image = attack.applyToPhase(image, imageOpts.isDarkMode());
             }
         }
 
         if (imageOpts.isPrayerIcons()) {
             for (int i = 0; i < prayers.length; i++) {
-                if (prayers[i] != null) {
-                    image = prayers[i].applyToPhase(image, i == 0);
-                }
+                image = prayers[i].applyToPhase(image, i == 0);
             }
         }
 

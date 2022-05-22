@@ -4,14 +4,11 @@ package com.zulrahhelper;
 import com.zulrahhelper.options.Attack;
 import com.zulrahhelper.options.OverheadProtection;
 
-import static com.zulrahhelper.options.OverheadProtection.PROTECT_FROM_MAGIC;
-import static com.zulrahhelper.options.OverheadProtection.PROTECT_FROM_MISSILES;
-
 public class PhaseBuilder {
     private int number;
     private Phase.Rotation rotation;
-    private Attack[] attacks = new Attack[3];
-    private OverheadProtection[] prayers = new OverheadProtection[2];
+    private Attack[] attacks = {Attack.NONE, Attack.NONE, Attack.NONE};
+    private OverheadProtection[] prayers = {OverheadProtection.NONE, OverheadProtection.NONE};
 
     public Phase build() {
         return new Phase(rotation, number, prayers, attacks);
@@ -43,19 +40,19 @@ public class PhaseBuilder {
     }
 
     public PhaseBuilder setRangedPray() {
-        setPrayer(PROTECT_FROM_MISSILES);
+        setPrayer(OverheadProtection.PROTECT_FROM_MISSILES);
         return this;
     }
 
     public PhaseBuilder setMagePray() {
-        setPrayer(PROTECT_FROM_MAGIC);
+        setPrayer(OverheadProtection.PROTECT_FROM_MAGIC);
         return this;
     }
 
     private void setPrayer(OverheadProtection protect) {
-        if (prayers[0] == null) {
+        if (prayers[0] == OverheadProtection.NONE) {
             prayers[0] = protect;
-        } else  {
+        } else {
             prayers[1] = protect;
         }
     }

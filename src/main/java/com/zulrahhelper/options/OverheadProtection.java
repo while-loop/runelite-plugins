@@ -27,6 +27,8 @@ public enum OverheadProtection {
     }
 
     public BufferedImage applyToPhase(BufferedImage phaseImg, boolean left) {
+        if (this == NONE) return phaseImg;
+
         Graphics g = phaseImg.getGraphics();
         g.drawImage(this.image, getX(phaseImg.getWidth(), left), getY(phaseImg.getHeight(), left), SIZE, SIZE, null);
         return phaseImg;

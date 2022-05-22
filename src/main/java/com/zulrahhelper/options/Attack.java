@@ -3,16 +3,15 @@ package com.zulrahhelper.options;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.FontManager;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 import static com.zulrahhelper.options.AttackSource.*;
 
 @Slf4j
 public enum Attack {
+
+    NONE(NORMAL, 0),
 
     NORMAL_2(NORMAL, 2),
     NORMAL_4(NORMAL, 4),
@@ -29,30 +28,40 @@ public enum Attack {
     SNAKELING_4(SNAKELING, 2),
     SNAKELING_6(SNAKELING, 2);
 
-    private static final int SIZE = 80;
-    private static final int PADDING = 10;
+    private static final int SIZE = 70;
+    private static final int PADDING = 5;
 
     private final AttackSource source;
-    private final BufferedImage image;
+    private final BufferedImage darkImg;
+    private final BufferedImage lightImg;
 
     Attack(AttackSource source, int hits) {
         this.source = source;
-        this.image = generateImage(source, hits);
+        this.darkImg = generateImage(hits, true);
+        this.lightImg = generateImage(hits, false);
     }
 
-    private BufferedImage generateImage(AttackSource source, int hits) {
+    public AttackSource getSource() {
+        return source;
+    }
+
+    public BufferedImage getImage(boolean darkMode) {
+        return (darkMode) ? darkImg : lightImg;
+    }
+
+    private BufferedImage generateImage(int hits, boolean darkMode) {
         BufferedImage out = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
 
         BufferedImage splat = source.getImage();
-        BufferedImage hit = createHit(hits);
+        BufferedImage hit = createHit(hits, darkMode);
 
         Graphics g = out.createGraphics();
         int splatX = 0;
         int splatY = 0;
         int splatSize = SIZE;
         if (source == SNAKELING) {
-            splatX -= PADDING;
-            splatY += PADDING;
+            splatX -= PADDING * 2;
+            splatY += PADDING * 2;
             splatSize /= 1.5;
         }
 
@@ -61,7 +70,15 @@ public enum Attack {
         return out;
     }
 
-    private BufferedImage createHit(int hits) {
+    public BufferedImage applyToPhase(BufferedImage phaseImg, boolean darkMode) {
+        if (this == NONE) return phaseImg;
+
+        Graphics g = phaseImg.getGraphics();
+        g.drawImage(this.getImage(darkMode), getX(phaseImg.getWidth(), source), getY(phaseImg.getHeight()), SIZE, SIZE, null);
+        return phaseImg;
+    }
+
+    private BufferedImage createHit(int hits, boolean darkMode) {
         BufferedImage hit = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
         final float fontSize = (float) (SIZE / 2);
 
@@ -77,27 +94,24 @@ public enum Attack {
 
         if (source == SNAKELING) {
             x += (PADDING / 2);
+            y += PADDING;
         }
 
         // draw text shadow
         g.setColor(Color.BLACK);
         g.drawString(text, x + 1, y + 1);
 
+        // snakeling light mode should have black text
+        if (source == SNAKELING && !darkMode) {
+            g.setColor(Color.BLACK);
+        } else {
+            g.setColor(Color.WHITE);
+        }
         // draw text
-        g.setColor(Color.WHITE);
         g.drawString(text, x, y);
         return hit;
     }
 
-    public AttackSource getSource() {
-        return source;
-    }
-
-    public BufferedImage applyToPhase(BufferedImage phaseImg) {
-        Graphics g = phaseImg.getGraphics();
-        g.drawImage(this.image, getX(phaseImg.getWidth(), source), getY(phaseImg.getHeight()), SIZE, SIZE, null);
-        return phaseImg;
-    }
 
     private static int getX(int phaseImgWidth, AttackSource source) {
         int offset = phaseImgWidth / 3;
