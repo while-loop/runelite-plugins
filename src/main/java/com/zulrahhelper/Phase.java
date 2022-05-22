@@ -1,53 +1,61 @@
 package com.zulrahhelper;
 
 
+import com.zulrahhelper.options.Attack;
+import com.zulrahhelper.options.OverheadProtection;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.ImageUtil;
 
-import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+@Slf4j
 public class Phase {
     public enum Rotation {
         START, NORMAL, MAGMA, MAGMA_A, MAGMA_B, TANZ
     }
 
-    public static final String IMG_PATH = "/phases/%s-%s%s.png";
+    public static final String IMG_PATH = "/phases/%s-%s.png";
 
     private final Rotation rotation;
     private final int number;
+
+    // ordered set of prayers. null means no prayer for this phase
+    private final OverheadProtection[] prayers;
+
+    // ordered set of attacks. null means attack does not happen in this phase
+    // 0 - normal
+    // 1 - venom
+    // 2 - snakeling
+    private final Attack[] attacks;
     private BufferedImage image;
     private boolean current = false;
     private boolean selectable = false;
     private boolean completed = false;
-    private String lastImgPath;
+    private ImageOptions lastImageOpts;
 
-    public Phase(Rotation rotation, int number) {
+    public static PhaseBuilder builder(Rotation rotation, int number) {
+        return new PhaseBuilder().setRotation(rotation).setNumber(number);
+    }
+
+    public Phase(Rotation rotation, int number, OverheadProtection[] prayers, Attack[] attacks) {
         this.rotation = rotation;
         this.number = number;
-        this.lastImgPath = getImgPath(rotation, number);
-        this.image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
+        this.prayers = prayers;
+        this.attacks = attacks;
+        this.image = getImage(new ImageOptions());
+    }
+
+    public Phase copy() {
+        return new Phase(rotation, number, prayers, attacks);
     }
 
     private String getImgPath(Rotation rotation, int number) {
-        return getImgPath(rotation, number, new ImageOptions());
-    }
-
-    private String getImgPath(Rotation rotation, int number, ImageOptions imgOpts) {
-        String options = "";
-
-        if (imgOpts.isDarkMode()) {
-            options += "-dark";
-        }
-        if (imgOpts.isPrayerIcons()) {
-            options += "-pray";
-        }
-        // attack versions of files automatically generated at
-        // https://github.com/burkeg/OSRS-Hitsplat-Generator/tree/zulrah
-        if (imgOpts.isAttackIcons()) {
-            options += "-attack";
-        }
-
-        return String.format(IMG_PATH, rotation.name().toLowerCase(), number, options);
+        return String.format(IMG_PATH, rotation.name().toLowerCase(), number);
     }
 
     public Rotation getRotation() {
@@ -71,11 +79,11 @@ public class Phase {
     }
 
     public void setCompleted(State state) {
-        this.completed = number < state.getSelectedPhase();
+        this.completed = number < state.getNumber();
     }
 
     public void setCurrent(State state) {
-        this.current = state.getSelectedPhase() == number && state.getRotation() == rotation;
+        this.current = state.getNumber() == number && state.getRotation() == rotation;
     }
 
     public void setSelectable(State state) {
@@ -89,13 +97,55 @@ public class Phase {
     }
 
     public BufferedImage getImage(ZulrahHelperConfig config) {
-        String currentImgPath = getImgPath(getRotation(), getNumber(), new ImageOptions(config));
-        if (currentImgPath.equals(lastImgPath)) {
+        return getImage(new ImageOptions(config));
+    }
+
+    public BufferedImage getImage(ImageOptions imgOpts) {
+        if (image != null && imgOpts.equals(lastImageOpts)) {
             return image;
         }
 
-        lastImgPath = currentImgPath;
-        image = ImageUtil.getResourceStreamFromClass(getClass(), lastImgPath);
+        String imgPath = getImgPath(rotation, number);
+        lastImageOpts = imgOpts;
+        image = ImageUtil.loadImageResource(getClass(), imgPath);
+        image = applyImageOptions(image, lastImageOpts);
+        return image;
+    }
+
+    private BufferedImage applyImageOptions(BufferedImage image, ImageOptions imageOpts) {
+        final double theta = imageOpts.getOrientation().getRotation();
+        if (theta != 0) {
+            image = ImageUtil.rotateImage(image, theta);
+        }
+
+        if (imageOpts.isAttackIcons()) {
+            for (Attack attack : attacks) {
+                if (attack != null) {
+                    image = attack.applyToPhase(image);
+                }
+            }
+        }
+
+        if (imageOpts.isPrayerIcons()) {
+            for (int i = 0; i < prayers.length; i++) {
+                if (prayers[i] != null) {
+                    image = prayers[i].applyToPhase(image, i == 0);
+                }
+            }
+        }
+
+        if (!imageOpts.isDarkMode()) {
+            // convert RGBA to RGB
+            if (image != null && image.getType() != BufferedImage.TYPE_INT_RGB) {
+                BufferedImage out = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2d = out.createGraphics();
+                g2d.drawImage(image, 0, 0, Color.WHITE, null);
+                g2d.dispose();
+                image = out;
+            }
+        }
+
+        if (image != null) image.flush();
         return image;
     }
 }

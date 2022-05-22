@@ -176,7 +176,7 @@ public class ZulrahHelperPlugin extends Plugin {
     }
 
     public void reset() {
-        setState(new Phase(Phase.Rotation.START, 1));
+        setState(State.START_PHASE);
     }
 
     private void selectOption(int choice) {
@@ -228,8 +228,7 @@ public class ZulrahHelperPlugin extends Plugin {
         hotkeys[3] = new HotkeyListener(() -> config.nextPhaseHotkey()) {
             @Override
             public void hotkeyPressed() {
-                Phase p = state.getPhase();
-                setState(new Phase(p.getRotation(), p.getNumber() + 1));
+                selectOption(0);
             }
         };
 

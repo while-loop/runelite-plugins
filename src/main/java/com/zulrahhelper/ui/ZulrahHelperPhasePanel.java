@@ -51,12 +51,7 @@ public class ZulrahHelperPhasePanel extends JPanel implements MouseListener {
         }
         img = ImageUtil.resizeImage(img, size, size);
         if (phase.isCompleted()) {
-            img = ImageUtil.luminanceScale(img, 0.20f);
-        }
-
-        final double theta = plugin.getConfig().imageOrientation().getRotation();
-        if (theta != 0) {
-            img = ImageUtil.rotateImage(img, theta);
+            img = ImageUtil.luminanceScale(img, 0.40f);
         }
 
         return img;

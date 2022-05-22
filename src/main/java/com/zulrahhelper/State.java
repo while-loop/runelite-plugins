@@ -2,24 +2,20 @@ package com.zulrahhelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static com.zulrahhelper.options.Attack.*;
+
 public class State {
-    private int selectedPhase = 1;
-    private int genPhase = 1;
-    private Phase.Rotation rotation = Phase.Rotation.START;
+    private Phase selectedPhase = START_PHASE;
 
-
-    public int getSelectedPhase() {
-        return selectedPhase;
-    }
-
-    public int getGenPhase() {
-        return genPhase;
+    public int getNumber() {
+        return selectedPhase.getNumber();
     }
 
     public Phase.Rotation getRotation() {
-        return rotation;
+        return selectedPhase.getRotation();
     }
 
     /**
@@ -28,40 +24,31 @@ public class State {
      * @param phase
      */
     public void setPhase(Phase phase) {
-        this.setRotation(phase.getRotation());
-        this.selectedPhase = phase.getNumber();
+        this.selectedPhase = phase.copy();
         if (phase.getRotation() == Phase.Rotation.MAGMA && phase.getNumber() == 2) {
-            this.selectedPhase = phase.getNumber() + 1;
+            // auto skip to the next magna phase since no input is required.
+            this.selectedPhase = MAGMA.get(2).get(0);
         }
-        this.genPhase = buildTree().size();
     }
 
     public Phase getPhase() {
-        return new Phase(rotation, selectedPhase);
-    }
-
-    public void setRotation(Phase.Rotation rotation) {
-        this.rotation = rotation;
+        return this.selectedPhase;
     }
 
     public void reset() {
-        this.genPhase = 1;
-        this.selectedPhase = 1;
-        this.rotation = Phase.Rotation.START;
+        this.selectedPhase = START_PHASE;
     }
 
     @Override
     public String toString() {
         return "State{" +
-                "genPhase=" + genPhase +
-                ", selectedPhase=" + selectedPhase +
-                ", rotation=" + rotation +
+                ", selectedPhase=" + selectedPhase.toString() +
                 '}';
     }
 
     public List<List<Phase>> buildTree() {
         List<List<Phase>> tree = new ArrayList<>();
-        switch (rotation) {
+        switch (selectedPhase.getRotation()) {
             case START:
                 tree = START;
                 break;
@@ -90,7 +77,7 @@ public class State {
                 p.setStates(this);
             }
 
-            if (phases.get(0).getNumber() > getSelectedPhase() + 1) {
+            if (phases.get(0).getNumber() > getNumber() + 1) {
                 if (phases.size() > 1) {
                     tree = tree.subList(0, tree.indexOf(phases) + 1);
                     break;
@@ -101,69 +88,75 @@ public class State {
         return tree;
     }
 
+    // -dark-pray-attack.png
+
+    public static final Phase START_PHASE = Phase.builder(Phase.Rotation.START, 1).addAttack(NORMAL_5).addAttack(VENOM_4).build();
     List<List<Phase>> START = Arrays.asList(
-            Arrays.asList(new Phase(Phase.Rotation.START, 1)),
+            Collections.singletonList(START_PHASE),
             Arrays.asList(
-                    new Phase(Phase.Rotation.MAGMA, 2),
-                    new Phase(Phase.Rotation.NORMAL, 2),
-                    new Phase(Phase.Rotation.TANZ, 2)
+                    Phase.builder(Phase.Rotation.MAGMA, 2).addAttack(NORMAL_2).build(),
+                    Phase.builder(Phase.Rotation.NORMAL, 2).addAttack(NORMAL_5).addAttack(SNAKELING_3).setRangedPray().build(),
+                    Phase.builder(Phase.Rotation.TANZ, 2).addAttack(NORMAL_6).setMagePray().build()
             )
     );
     List<List<Phase>> MAGMA = Arrays.asList(
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA, 1)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA, 2)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA, 3)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 4), new Phase(Phase.Rotation.MAGMA_B, 4))
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA, 1).addAttack(NORMAL_5).addAttack(VENOM_4).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA, 2).addAttack(NORMAL_2).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA, 3).addAttack(NORMAL_4).setMagePray().build()),
+            Arrays.asList(
+                    Phase.builder(Phase.Rotation.MAGMA_A, 4).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_4).setRangedPray().build(),
+                    Phase.builder(Phase.Rotation.MAGMA_B, 4).addAttack(VENOM_4).addAttack(SNAKELING_4).build()
+            )
     );
     List<List<Phase>> MAGMA_A = Arrays.asList(
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 1)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 2)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 3)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 4)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 5)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 6)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 7)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 8)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 9)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_A, 10))
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 1).addAttack(NORMAL_5).addAttack(VENOM_4).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 2).addAttack(NORMAL_2).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 3).addAttack(NORMAL_4).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 4).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_4).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 5).addAttack(NORMAL_2).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 6).addAttack(NORMAL_2).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 7).addAttack(VENOM_3).addAttack(SNAKELING_4).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 8).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_3).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 9).addAttack(NORMAL_10).addAttack(VENOM_4).setRangedPray().setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 10).build())
     );
     List<List<Phase>> MAGMA_B = Arrays.asList(
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 1)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 2)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 3)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 4)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 5)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 6)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 7)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 8)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 9)),
-            Arrays.asList(new Phase(Phase.Rotation.MAGMA_B, 10))
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 1).addAttack(NORMAL_5).addAttack(VENOM_4).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 2).addAttack(NORMAL_2).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 3).addAttack(NORMAL_4).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 4).addAttack(VENOM_3).addAttack(SNAKELING_4).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 5).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_4).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 6).addAttack(NORMAL_2).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 7).addAttack(NORMAL_5).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 8).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_3).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 9).addAttack(NORMAL_10).addAttack(VENOM_4).setRangedPray().setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_B, 10).addAttack(NORMAL_2).build())
     );
     List<List<Phase>> NORMAL = Arrays.asList(
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 1)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 2)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 3)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 4)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 5)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 6)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 7)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 8)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 9)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 10)),
-            Arrays.asList(new Phase(Phase.Rotation.NORMAL, 11))
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 1).addAttack(NORMAL_5).addAttack(VENOM_4).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 2).addAttack(NORMAL_5).addAttack(SNAKELING_3).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 3).addAttack(NORMAL_2).addAttack(VENOM_3).addAttack(SNAKELING_3).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 4).addAttack(NORMAL_5).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 5).addAttack(NORMAL_5).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 6).addAttack(NORMAL_5).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 7).addAttack(VENOM_3).addAttack(SNAKELING_3).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 8).addAttack(NORMAL_5).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 9).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_3).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 10).addAttack(NORMAL_10).setMagePray().setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.NORMAL, 11).addAttack(SNAKELING_4).build())
     );
     List<List<Phase>> TANZ = Arrays.asList(
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 1)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 2)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 3)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 4)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 5)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 6)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 7)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 8)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 9)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 10)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 11)),
-            Arrays.asList(new Phase(Phase.Rotation.TANZ, 12))
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 1).addAttack(NORMAL_5).addAttack(VENOM_4).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 2).addAttack(NORMAL_6).addAttack(SNAKELING_4).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 3).addAttack(NORMAL_4).addAttack(VENOM_2).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 4).addAttack(NORMAL_4).addAttack(SNAKELING_4).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 5).addAttack(NORMAL_2).addAttack(VENOM_2).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 6).addAttack(NORMAL_4).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 7).addAttack(VENOM_3).addAttack(SNAKELING_6).build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 8).addAttack(NORMAL_5).addAttack(VENOM_4).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 9).addAttack(NORMAL_5).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 10).addAttack(NORMAL_4).addAttack(VENOM_3).setMagePray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 11).addAttack(NORMAL_8).setMagePray().setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.TANZ, 12).addAttack(SNAKELING_4).build())
     );
 }

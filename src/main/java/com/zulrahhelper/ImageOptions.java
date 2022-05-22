@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 public class ImageOptions {
     private boolean attackIcons = false;
     private boolean prayerIcons = false;
-    private boolean darkMode = false;
+    private boolean darkMode = true;
     private ImageOrientation orientation = ImageOrientation.SOUTH;
 
     public ImageOptions() {}
