@@ -119,7 +119,7 @@ public class State {
             Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 4).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_4).setRangedPray().build()),
             Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 5).addAttack(NORMAL_2).build()),
             Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 6).addAttack(NORMAL_2).setMagePray().build()),
-            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 7).addAttack(VENOM_3).addAttack(SNAKELING_4).setRangedPray().build()),
+            Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 7).addAttack(VENOM_3).addAttack(SNAKELING_4).build()),
             Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 8).addAttack(NORMAL_5).addAttack(VENOM_2).addAttack(SNAKELING_3).setMagePray().build()),
             Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 9).addAttack(NORMAL_10).addAttack(VENOM_4).setRangedPray().setMagePray().build()),
             Collections.singletonList(Phase.builder(Phase.Rotation.MAGMA_A, 10).build())
