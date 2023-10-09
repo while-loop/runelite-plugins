@@ -30,28 +30,29 @@ public class CaseManager {
     private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://raw.githubusercontent.com/while-loop/runelite-plugins/runewatch/data/mixedlist.json");
 
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    final Gson GSON = new GsonBuilder().registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
-        try {
-            // Allow handling of the occasional empty string as a date.
-            return df.parse(json.getAsString());
-        } catch (ParseException e) {
-            return Date.from(Instant.ofEpochSecond(0));
-        }
-    }).create();
     private static final Type typeToken = new TypeToken<List<Case>>() {
     }.getType();
 
     private final OkHttpClient client;
+    private final Gson gson;
     private final Map<String, Case> rwCases = new ConcurrentHashMap<>();
     private final Map<String, Case> wdrCases = new ConcurrentHashMap<>();
     private final ClientThread clientThread;
     private final RuneWatchConfig config;
 
     @Inject
-    private CaseManager(OkHttpClient client, ClientThread clientThread, RuneWatchConfig config) {
+    private CaseManager(OkHttpClient client, ClientThread clientThread, RuneWatchConfig config, Gson gson) {
         this.client = client;
         this.clientThread = clientThread;
         this.config = config;
+        this.gson = gson.newBuilder().registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
+            try {
+                // Allow handling of the occasional empty string as a date.
+                return df.parse(json.getAsString());
+            } catch (ParseException e) {
+                return Date.from(Instant.ofEpochSecond(0));
+            }
+        }).create();;
     }
 
     /**
@@ -73,7 +74,7 @@ public class CaseManager {
                     if (response.code() < 200 || response.code() >= 400) {
                         log.error("failed to get watchlist. status: {}", response.code());
                     } else {
-                        List<Case> cases = GSON.fromJson(new InputStreamReader(response.body().byteStream()), typeToken);
+                        List<Case> cases = gson.fromJson(new InputStreamReader(response.body().byteStream()), typeToken);
                         rwCases.clear();
                         wdrCases.clear();
                         for (Case c : cases) {
