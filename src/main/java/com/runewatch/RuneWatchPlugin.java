@@ -36,10 +36,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -175,6 +180,8 @@ public class RuneWatchPlugin extends Plugin {
 
     private Image tradeImage;
     private String trader;
+
+    private static Map<String, Instant> lastNotified = new ConcurrentHashMap<>();
 
     @Provides
     RuneWatchConfig provideConfig(ConfigManager configManager) {
@@ -425,6 +432,7 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onCommandExecuted(CommandExecuted ce) {
+        // ::rwd rw <username>
         if (developerMode && ce.getCommand().equals("rwd")) {
             caseManager.refresh(() -> {
                 if (ce.getArguments().length > 0) {
@@ -527,7 +535,7 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
-    private void alertPlayerWarning(String rsn, boolean notifyClear, AlertType alertType) {
+    private void alertPlayerWarning(String rsn, boolean playerExecuted, AlertType alertType) {
         rsn = Text.toJagexName(rsn);
         Case rwCase = caseManager.get(rsn);
         ChatMessageBuilder response = new ChatMessageBuilder();
@@ -536,7 +544,7 @@ public class RuneWatchPlugin extends Plugin {
                 .append(rsn)
                 .append(ChatColorType.NORMAL);
 
-        if (rwCase == null && !notifyClear) {
+        if (rwCase == null && !playerExecuted) {
             return;
         } else if (rwCase == null) {
             response.append(" is not on any watchlist.");
@@ -553,12 +561,32 @@ public class RuneWatchPlugin extends Plugin {
                 response.append(ChatColorType.NORMAL)
                         .append(".");
             }
+
+            // Don't send a message in chat if the investigate action was a background task
+            // and we've already notified about this player.
+            if (!playerExecuted) {
+                if (isNotifyOnCooldown(rsn)) {
+                    return;
+                } else {
+                    lastNotified.put(rsn, Instant.now());
+                }
+            }
         }
 
         chatMessageManager.queue(QueuedMessage.builder()
                 .type(ChatMessageType.CONSOLE)
                 .runeLiteFormattedMessage(response.build())
                 .build());
+    }
+
+    boolean isNotifyOnCooldown(String rsn) {
+        Instant last = lastNotified.get(rsn);
+        if (last == null) {
+            return false;
+        }
+
+
+        return last.plus(config.notificationCooldown(), ChronoUnit.MINUTES).isAfter(Instant.now());
     }
 
     private void colorFriendsChat() {

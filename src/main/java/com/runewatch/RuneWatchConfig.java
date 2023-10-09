@@ -1,9 +1,6 @@
 package com.runewatch;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.*;
 import net.runelite.client.util.ImageUploadStyle;
 
 import java.awt.*;
@@ -131,6 +128,19 @@ public interface RuneWatchConfig extends Config {
     )
     default boolean notifyOnNearby() {
         return true;
+    }
+
+    @ConfigItem(
+            position = 9,
+            keyName = "notificationCooldown",
+            name = "Cooldown",
+            description = "How many minutes should pass before re-alerting when a player is on a watch list (0 always notifies)",
+            section = NOTIFICATIONS_SECTION
+    )
+    @Units(Units.MINUTES)
+    default int notificationCooldown()
+    {
+        return 60;
     }
 
     @ConfigSection(
