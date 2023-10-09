@@ -26,7 +26,7 @@ dependencies {
 }
 
 group = 'com.runewatch'
-version = '2.3.0'
+version = '2.3.1'
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
