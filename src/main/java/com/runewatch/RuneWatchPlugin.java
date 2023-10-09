@@ -50,12 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-@PluginDescriptor(
-        name = "RuneWatch",
-        description = "",
-        tags = {},
-        enabledByDefault = false
-)
+@PluginDescriptor(name = "RuneWatch")
 public class RuneWatchPlugin extends Plugin {
     private static final String INVESTIGATE = "Investigate";
     private static final String FOLDER_NAME = "Trades";
