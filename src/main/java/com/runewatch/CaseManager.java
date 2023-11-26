@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Singleton
 public class CaseManager {
-    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://raw.githubusercontent.com/while-loop/runelite-plugins/runewatch/data/mixedlist.json");
+    private static final HttpUrl RUNEWATCH_LIST_URL = HttpUrl.parse("https://raw.githubusercontent.com/while-loop/runelite-plugins/runewatch-updater/data/mixedlist.json");
 
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     private static final Type typeToken = new TypeToken<List<Case>>() {
