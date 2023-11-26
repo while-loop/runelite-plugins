@@ -1,7 +1,6 @@
 package com.runewatch;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ObjectArrays;
 import com.google.inject.Provides;
 import joptsimple.internal.Strings;
 import lombok.AccessLevel;
@@ -10,9 +9,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
+import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetID;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -30,16 +29,13 @@ import net.runelite.client.task.Schedule;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageCapture;
 import net.runelite.client.util.Text;
-import org.apache.commons.lang3.ArrayUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,19 +83,19 @@ public class RuneWatchPlugin extends Plugin {
     );
 
     private static final List<Integer> MENU_WIDGET_IDS = ImmutableList.of(
-            WidgetInfo.FRIENDS_LIST.getGroupId(),
-            WidgetInfo.IGNORE_LIST.getGroupId(),
+            InterfaceID.FRIEND_LIST,
+            InterfaceID.IGNORE_LIST,
 
-            WidgetInfo.CHATBOX.getGroupId(),
-            WidgetInfo.FRIENDS_CHAT.getGroupId(),
-            WidgetInfo.PRIVATE_CHAT_MESSAGE.getGroupId(),
+            ComponentID.CHATBOX_FRAME,
+            InterfaceID.FRIENDS_CHAT,
+            InterfaceID.PRIVATE_CHAT,
 
-            WidgetInfo.RAIDING_PARTY.getGroupId(),
+            InterfaceID.RAIDING_PARTY,
             COX_PARTY_DETAILS_GROUP_ID,
             TOB_PARTY_DETAILS_GROUP_ID,
 
-            WidgetInfo.CLAN_MEMBER_LIST.getGroupId(),
-            WidgetInfo.CLAN_GUEST_MEMBER_LIST.getGroupId()
+            ComponentID.CLAN_MEMBERS,
+            ComponentID.CLAN_GUEST_MEMBERS
     );
 
     private static final ImmutableList<String> AFTER_OPTIONS = ImmutableList.of(
@@ -259,7 +255,7 @@ public class RuneWatchPlugin extends Plugin {
             return;
         }
 
-        int groupId = WidgetInfo.TO_GROUP(event.getActionParam1());
+        int groupId = RuneWatchPlugin.TO_GROUP(event.getActionParam1());
         String option = event.getOption();
 
         if (!MENU_WIDGET_IDS.contains(groupId) || !AFTER_OPTIONS.contains(option)) {
@@ -344,7 +340,7 @@ public class RuneWatchPlugin extends Plugin {
 
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked event) {
-        int groupId = WidgetInfo.TO_GROUP(event.getWidgetId());
+        int groupId = RuneWatchPlugin.TO_GROUP(event.getParam1());
         String option = event.getMenuOption();
         MenuAction action = event.getMenuAction();
 
@@ -478,7 +474,7 @@ public class RuneWatchPlugin extends Plugin {
                 int gameOffsetY = 0;
 
                 graphics.drawImage(image, gameOffsetX, gameOffsetY, null);
-                imageCapture.takeScreenshot(screenshot, otherRsn, FOLDER_NAME, config.notifyWhenScreenshotTaken(), config.uploadTradeScreenshot());
+                imageCapture.saveScreenshot(screenshot, otherRsn, FOLDER_NAME, config.notifyWhenScreenshotTaken(), config.screenshotToClipboard());
             });
         } else {
             clearScreenshot();
@@ -585,21 +581,21 @@ public class RuneWatchPlugin extends Plugin {
     }
 
     private void colorFriendsChat() {
-        Widget ccList = client.getWidget(WidgetInfo.FRIENDS_CHAT_LIST);
+        Widget ccList = client.getWidget(ComponentID.FRIENDS_CHAT_LIST);
         if (ccList != null) {
             illiteratePlayerWidgets(ccList);
         }
     }
 
     private void colorClanChat() {
-        Widget clanChatList = client.getWidget(WidgetInfo.CLAN_MEMBER_LIST);
+        Widget clanChatList = client.getWidget(ComponentID.CLAN_MEMBERS);
         if (clanChatList != null) {
             illiteratePlayerWidgets(clanChatList);
         }
     }
 
     private void colorGuestClanChat() {
-        Widget guestClanChatList = client.getWidget(WidgetInfo.CLAN_MEMBER_LIST);
+        Widget guestClanChatList = client.getWidget(ComponentID.CLAN_MEMBERS);
         if (guestClanChatList != null) {
             illiteratePlayerWidgets(guestClanChatList);
         }
@@ -624,7 +620,7 @@ public class RuneWatchPlugin extends Plugin {
     }
 
     private void colorRaidsSidePanel() {
-        Widget raidsList = client.getWidget(WidgetID.RAIDING_PARTY_GROUP_ID, 10);
+        Widget raidsList = client.getWidget(InterfaceID.RAIDING_PARTY, 10);
         if (raidsList != null) {
             colorTable(raidsList, 4);
         }
@@ -731,4 +727,10 @@ public class RuneWatchPlugin extends Plugin {
         }
     }
 
+    /*
+        Copy of {WidgetInfo.TO_GROUP
+     */
+    public static int TO_GROUP(int id) {
+        return id >>> 16;
+    }
 }

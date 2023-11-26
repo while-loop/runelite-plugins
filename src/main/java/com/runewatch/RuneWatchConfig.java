@@ -42,13 +42,13 @@ public interface RuneWatchConfig extends Config {
 
     @ConfigItem(
             position = 2,
-            keyName = "uploadTradeScreenshot",
+            keyName = "screenshotToClipboard",
             name = "Upload",
-            description = "Configures whether or not screenshots are uploaded to Imgur, or placed on your clipboard",
+            description = "Configures whether or not screenshots are placed on your clipboard",
             section = SCREENSHOT_SECTION
     )
-    default ImageUploadStyle uploadTradeScreenshot() {
-        return ImageUploadStyle.NEITHER;
+    default boolean screenshotToClipboard() {
+        return false;
     }
 
     @ConfigSection(
