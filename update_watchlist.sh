@@ -9,10 +9,10 @@ status_code=`curl \
       --max-time 5 \
       -w "%{http_code}" \
       -H "Accept: application/json" \
-      https://www.runewatch.com/api/cases/mixedlist \
+      https://runewatch.com/api/cases/mixedlist \
       --output ${MIXEDLIST_FILE} 2> /dev/null`
 
-# make code 500 exit 0 to reduce email spam when runewatch is down 
+# make code 500 exit 0 to reduce email spam when runewatch is down
 if [[ ${status_code} == 500 || ${status_code} == 502 ]]; then
   echo "[ERROR] RuneWatch returned 500 status code"
   exit 0
