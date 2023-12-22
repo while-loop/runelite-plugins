@@ -1,6 +1,6 @@
 package com.zulrahhelper.options;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import com.google.common.io.BaseEncoding;
 import com.zulrahhelper.ImageOptions;
 import com.zulrahhelper.ImageOrientation;
 import com.zulrahhelper.Phase;
@@ -51,7 +51,8 @@ public class PhaseTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "png", baos);
         byte[] bytes = baos.toByteArray();
-        return Base64.encode(bytes);
+
+        return BaseEncoding.base64().encode(bytes);
     }
 
     private File toFile(BufferedImage img) throws IOException {

@@ -257,14 +257,11 @@ public class ZulrahHelperPlugin extends Plugin {
             clientToolbar.addNavigation(navButton);
             if (show) {
                 SwingUtilities.invokeLater(() -> {
-                    if (!navButton.isSelected()) {
-                        navButton.getOnSelect().run();
-                    }
+					clientToolbar.openPanel(navButton);
                 });
             }
         } else {
             clientToolbar.removeNavigation(navButton);
-            navButton.setSelected(false);
         }
     }
 }
