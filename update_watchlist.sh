@@ -6,7 +6,7 @@ cd ${SCRIPTS_DIR}
 
 echo [INFO] Downloading RuneWatch mixedlist
 status_code=`curl \
-      --max-time 5 \
+      --max-time 15 \
       -w "%{http_code}" \
       -H "Accept: application/json" \
       https://runewatch.com/api/cases/mixedlist \
@@ -16,6 +16,9 @@ status_code=`curl \
 if [[ ${status_code} == 500 || ${status_code} == 502 ]]; then
   echo "[ERROR] RuneWatch returned 500 status code"
   exit 0
+elif [[ ${status_code} == 000 ]]; then
+  echo "[ERROR] Failed to get watchlist. Possible timeout"
+  exit 1
 elif [[ ${status_code} != 200 ]]; then
   echo "[ERROR] RuneWatch returned non-200 status code: ${status_code}"
   exit 1
