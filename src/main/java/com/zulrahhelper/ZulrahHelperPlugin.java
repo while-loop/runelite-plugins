@@ -46,17 +46,6 @@ public class ZulrahHelperPlugin extends Plugin
 	private static final int ZULRAH_SPAWN_REGION_ID = 9007;
 	private static final int ZULRAH_REGION_ID = 9008;
 
-	private static final List<Integer> REGION_IDS = Arrays.asList(
-		ZULANDRA_REGION_ID,
-		ZULRAH_SPAWN_REGION_ID,
-		ZULRAH_REGION_ID
-	);
-
-	private static final List<Integer> INSTANCE_IDS = Arrays.asList(
-		ZULRAH_SPAWN_REGION_ID,
-		ZULRAH_REGION_ID
-	);
-
 	private static final List<String> OPTION_KEYS = Arrays.asList(
 		DARK_MODE_KEY,
 		DISPLAY_PRAYER_KEY,
@@ -82,8 +71,6 @@ public class ZulrahHelperPlugin extends Plugin
 
 	private State state;
 	private HotkeyListener[] hotkeys = new HotkeyListener[5];
-
-	private int lastRegionId = -1;
 	private boolean hotkeysEnabled = false;
 	private boolean panelEnabled = false;
 
@@ -126,12 +113,6 @@ public class ZulrahHelperPlugin extends Plugin
 		{
 			panel.update(state);
 		}
-
-		if (event.getKey().equals(AUTO_HIDE_KEY))
-		{
-			boolean atZul = REGION_IDS.contains(getRegionId());
-			togglePanel(atZul || !config.autoHide(), false);
-		}
 	}
 
 	@Provides
@@ -148,25 +129,38 @@ public class ZulrahHelperPlugin extends Plugin
 
 	private void checkRegion()
 	{
-		final int regionId = getRegionId();
-		if ((hotkeysEnabled && !INSTANCE_IDS.contains(regionId)) ||
-			(!hotkeysEnabled && INSTANCE_IDS.contains(regionId)))
+		if (inZulrahRegion())
 		{
-			toggleHotkeys();
-		}
-
-		if (config.autoHide())
-		{
-			if (!REGION_IDS.contains(regionId) && panelEnabled)
+			if (!hotkeysEnabled)
 			{
-				togglePanel(false, false);
-			} else if (REGION_IDS.contains(lastRegionId) && !panelEnabled)
+				toggleHotkeys();
+			}
+
+			if (config.autoHide() && !panelEnabled)
 			{
 				togglePanel(true, true);
 			}
 		}
+		else
+		{
+			if (hotkeysEnabled)
+			{
+				toggleHotkeys();
+			}
 
-		lastRegionId = regionId;
+			if (config.autoHide() && panelEnabled)
+			{
+				togglePanel(false, false);
+			}
+		}
+	}
+
+	private boolean inZulrahRegion()
+	{
+		final int regionId = getRegionId();
+
+		return regionId == ZULANDRA_REGION_ID ||
+			((regionId == ZULRAH_SPAWN_REGION_ID || regionId == ZULRAH_REGION_ID) && client.isInInstancedRegion());
 	}
 
 	private int getRegionId()
@@ -213,8 +207,6 @@ public class ZulrahHelperPlugin extends Plugin
 
 	private void initHotkeys()
 	{
-
-
 		hotkeys[0] = new HotkeyListener(() -> config.phaseSelection1Hotkey())
 		{
 			@Override
