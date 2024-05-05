@@ -160,7 +160,7 @@ public class ZulrahHelperPlugin extends Plugin
 			if (!REGION_IDS.contains(regionId) && panelEnabled)
 			{
 				togglePanel(false, false);
-			} else if (!REGION_IDS.contains(lastRegionId) && !panelEnabled)
+			} else if (REGION_IDS.contains(lastRegionId) && !panelEnabled)
 			{
 				togglePanel(true, true);
 			}
