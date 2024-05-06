@@ -25,7 +25,7 @@ public class ZulrahHelperPanel extends PluginPanel {
     private static final ImageIcon RESET_HOVER_ICON;
 
     static {
-        final BufferedImage addIcon = ImageUtil.getResourceStreamFromClass(ZulrahHelperPlugin.class, "/ui/reset_icon.png");
+        final BufferedImage addIcon = ImageUtil.loadImageResource(ZulrahHelperPlugin.class, "/ui/reset_icon.png");
         RESET_ICON = new ImageIcon(addIcon);
         RESET_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
     }
