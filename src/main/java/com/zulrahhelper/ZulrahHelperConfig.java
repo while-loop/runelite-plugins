@@ -72,6 +72,17 @@ public interface ZulrahHelperConfig extends Config {
         return true;
     }
 
+	@ConfigItem(
+		keyName = ZulrahHelperPlugin.RESET_ON_LEAVE_KEY,
+		section = ZulrahHelperPlugin.SECTION_MISC,
+		name = "Reset on Leave",
+		description = "Automatically reset when leaving the Zulrah area",
+		position = 2
+	)
+	default boolean resetOnLeave() {
+		return true;
+	}
+
     @ConfigItem(
             keyName = "resetPhasesHotkey",
             section = ZulrahHelperPlugin.SECTION_HOTKEYS,

@@ -41,6 +41,7 @@ public class ZulrahHelperPlugin extends Plugin
 	static final String DISPLAY_ATTACK_KEY = "displayAttack";
 	static final String IMAGE_ORIENTATION_KEY = "imageOrientation";
 	static final String AUTO_HIDE_KEY = "autoHide";
+	static final String RESET_ON_LEAVE_KEY = "resetOnLeave";
 
 	private static final int ZULANDRA_REGION_ID = 8751;
 	private static final int ZULRAH_SPAWN_REGION_ID = 9007;
@@ -50,7 +51,8 @@ public class ZulrahHelperPlugin extends Plugin
 		DARK_MODE_KEY,
 		DISPLAY_PRAYER_KEY,
 		DISPLAY_ATTACK_KEY,
-		IMAGE_ORIENTATION_KEY
+		IMAGE_ORIENTATION_KEY,
+		RESET_ON_LEAVE_KEY
 	);
 
 	@Inject
@@ -73,6 +75,7 @@ public class ZulrahHelperPlugin extends Plugin
 	private HotkeyListener[] hotkeys = new HotkeyListener[5];
 	private boolean hotkeysEnabled = false;
 	private boolean panelEnabled = false;
+	private boolean wasInInstance = false;
 
 	@Override
 	protected void startUp() throws Exception
@@ -113,6 +116,11 @@ public class ZulrahHelperPlugin extends Plugin
 		{
 			panel.update(state);
 		}
+
+		if (event.getKey().equals(AUTO_HIDE_KEY) && !config.autoHide())
+		{
+			togglePanel(true, false);
+		}
 	}
 
 	@Provides
@@ -140,6 +148,13 @@ public class ZulrahHelperPlugin extends Plugin
 			{
 				togglePanel(true, true);
 			}
+
+			if (wasInInstance && !client.isInInstancedRegion())
+			{
+				reset();
+			}
+
+			wasInInstance = client.isInInstancedRegion();
 		}
 		else
 		{
@@ -148,9 +163,19 @@ public class ZulrahHelperPlugin extends Plugin
 				toggleHotkeys();
 			}
 
-			if (config.autoHide() && panelEnabled)
+			if (panelEnabled && config.autoHide())
 			{
 				togglePanel(false, false);
+			}
+
+			if (wasInInstance)
+			{
+				if (config.resetOnLeave())
+				{
+					reset();
+				}
+
+				wasInInstance = false;
 			}
 		}
 	}
