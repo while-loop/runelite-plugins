@@ -25,10 +25,6 @@ public class State {
      */
     public void setPhase(Phase phase) {
         this.selectedPhase = phase.copy();
-        if (phase.getRotation() == Phase.Rotation.MAGMA && phase.getNumber() == 2) {
-            // auto skip to the next magna phase since no input is required.
-            this.selectedPhase = MAGMA.get(2).get(0);
-        }
     }
 
     public Phase getPhase() {
