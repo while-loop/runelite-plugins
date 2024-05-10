@@ -1,5 +1,6 @@
 package com.zulrahhelper;
 
+import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -48,11 +49,34 @@ public interface ZulrahHelperConfig extends Config
 		keyName = ZulrahHelperPlugin.DISPLAY_ATTACK_KEY,
 		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
 		name = "Attack Icons",
-		description = "Set phase images to use attack icons, " +
-			"denoting what attacks Zulrah will use per phase.",
+		description = "Display number of Zulrah attacks",
 		position = 1
 	)
 	default boolean displayAttackIcons()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = ZulrahHelperPlugin.DISPLAY_VENOM_KEY,
+		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
+		name = "Venom Icons",
+		description = "Display number of venon attacks",
+		position = 1
+	)
+	default boolean displayVenom()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = ZulrahHelperPlugin.DISPLAY_SNAKELINGS_KEY,
+		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
+		name = "Snakeling Icons",
+		description = "Display snakeling spawns",
+		position = 1
+	)
+	default boolean displaySnakelings()
 	{
 		return false;
 	}
@@ -67,6 +91,42 @@ public interface ZulrahHelperConfig extends Config
 	default boolean darkMode()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+		keyName = ZulrahHelperPlugin.MAGE_COLOR_KEY,
+		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
+		name = "Mage Form Color",
+		description = "Color of Zulrah mage form",
+		position = 3
+	)
+	default Color mageColor()
+	{
+		return new Color(0, 51, 255);
+	}
+
+	@ConfigItem(
+		keyName = ZulrahHelperPlugin.RANGE_COLOR_KEY,
+		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
+		name = "Range Form Color",
+		description = "Color of Zulrah range form",
+		position = 3
+	)
+	default Color rangeColor()
+	{
+		return new Color(25, 194, 4);
+	}
+
+	@ConfigItem(
+		keyName = ZulrahHelperPlugin.MELEE_COLOR_KEY,
+		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
+		name = "Melee Form Color",
+		description = "Color of Zulrah melee form",
+		position = 3
+	)
+	default Color meleeColor()
+	{
+		return new Color(251, 0, 7);
 	}
 
 	@ConfigItem(
