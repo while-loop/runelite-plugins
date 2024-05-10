@@ -70,6 +70,14 @@ public class Images
 		var spawn = step.getSpawn();
 		spawn.drawLocation(g, step.getForm().getColor(config), px, py);
 
+		var theta = config.imageOrientation().getRotation();
+		if (theta != 0)
+		{
+			image = ImageUtil.rotateImage(image, theta);
+			g.dispose();
+			g = (Graphics2D) image.getGraphics();
+		}
+
 		var prayers = step.getPrayers();
 		if (config.displayPrayerIcons())
 		{
@@ -100,8 +108,6 @@ public class Images
 			var x = WIDTH - SNAKELINGS.getWidth() * 2 + PADDING * 2;
 			drawSplat(g, c, SNAKELINGS, step.getSnakelings() + "", x, x + PADDING);
 		}
-
-		g.rotate(config.imageOrientation().getRotation());
 
 		g.dispose();
 		return image;
