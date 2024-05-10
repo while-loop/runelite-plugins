@@ -1,7 +1,10 @@
 package com.zulrahhelper;
 
 import com.google.inject.Provides;
+import com.zulrahhelper.tree.Node;
+import com.zulrahhelper.tree.PatternTree;
 import com.zulrahhelper.ui.ZulrahHelperPanel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
@@ -39,9 +42,15 @@ public class ZulrahHelperPlugin extends Plugin
 	static final String DARK_MODE_KEY = "darkMode";
 	static final String DISPLAY_PRAYER_KEY = "displayPrayer";
 	static final String DISPLAY_ATTACK_KEY = "displayAttack";
+	static final String DISPLAY_VENOM_KEY = "displayVenom";
+	static final String DISPLAY_SNAKELINGS_KEY = "displaySnakelings";
 	static final String IMAGE_ORIENTATION_KEY = "imageOrientation";
 	static final String AUTO_HIDE_KEY = "autoHide";
 	static final String RESET_ON_LEAVE_KEY = "resetOnLeave";
+	static final String MAGE_COLOR_KEY = "mageColor";
+	static final String RANGE_COLOR_KEY = "rangeColor";
+	static final String MELEE_COLOR_KEY = "meleeColor";
+
 
 	private static final int ZULANDRA_REGION_ID = 8751;
 	private static final int ZULRAH_SPAWN_REGION_ID = 9007;
@@ -52,7 +61,12 @@ public class ZulrahHelperPlugin extends Plugin
 		DISPLAY_PRAYER_KEY,
 		DISPLAY_ATTACK_KEY,
 		IMAGE_ORIENTATION_KEY,
-		RESET_ON_LEAVE_KEY
+		RESET_ON_LEAVE_KEY,
+		DISPLAY_VENOM_KEY,
+		DISPLAY_SNAKELINGS_KEY,
+		MAGE_COLOR_KEY,
+		MELEE_COLOR_KEY,
+		RANGE_COLOR_KEY
 	);
 
 	@Inject
@@ -65,14 +79,16 @@ public class ZulrahHelperPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private PatternTree tree;
+
+	@Inject
 	@Getter
 	private ZulrahHelperConfig config;
 
 	private ZulrahHelperPanel panel;
 	private NavigationButton navButton;
 
-	private State state;
-	private HotkeyListener[] hotkeys = new HotkeyListener[5];
+	private final List<HotkeyListener> hotkeys = new ArrayList<>();
 	private boolean hotkeysEnabled = false;
 	private boolean panelEnabled = false;
 	private boolean wasInInstance = false;
@@ -80,28 +96,26 @@ public class ZulrahHelperPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		panel = new ZulrahHelperPanel(this);
-		state = new State();
+		panel = injector.getInstance(ZulrahHelperPanel.class);
 		navButton = NavigationButton.builder()
 			.tooltip("Zulrah Helper")
 			.icon(ImageUtil.loadImageResource(getClass(), "/icon.png"))
 			.priority(70)
 			.panel(panel)
 			.build();
+		clientToolbar.addNavigation(navButton);
 
 		initHotkeys();
 		togglePanel(!config.autoHide(), false);
-		panel.update(state);
+		reset();
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
 		clientToolbar.removeNavigation(navButton);
-		if (hotkeysEnabled)
-		{
-			toggleHotkeys();
-		}
+		hotkeys.forEach(keyManager::unregisterKeyListener);
+		hotkeys.clear();
 	}
 
 	@Subscribe
@@ -114,7 +128,7 @@ public class ZulrahHelperPlugin extends Plugin
 
 		if (OPTION_KEYS.contains(event.getKey()))
 		{
-			panel.update(state);
+			rebuildPanel();
 		}
 
 		if (event.getKey().equals(AUTO_HIDE_KEY) && !config.autoHide())
@@ -201,19 +215,32 @@ public class ZulrahHelperPlugin extends Plugin
 
 	public void reset()
 	{
-		setState(State.START_PHASE);
+		tree.reset();
+		SwingUtilities.invokeLater(() -> panel.rebuildPanel());
+	}
+
+	public void setState(Node node)
+	{
+		var s = tree.find(node.getValue());
+		if (s == null)
+		{
+			log.debug("state not found {}", node);
+			return;
+		}
+
+		tree.setState(s);
+		rebuildPanel();
+	}
+
+	private void rebuildPanel()
+	{
+		SwingUtilities.invokeLater(() -> panel.rebuildPanel());
 	}
 
 	private void selectOption(int choice)
 	{
-		List<List<Phase>> tree = state.buildTree();
-		if (tree == null || tree.size() <= 0)
-		{
-			log.error("no state tree found");
-			return;
-		}
-
-		List<Phase> choices = tree.get(tree.size() - 1);
+		var node = tree.getState();
+		var choices = node.getChildren();
 		if (choice >= choices.size())
 		{
 			log.error("trying to select nonexistent phase: {} {}", choice, choices.size());
@@ -223,74 +250,60 @@ public class ZulrahHelperPlugin extends Plugin
 		setState(choices.get(choice));
 	}
 
-	public void setState(Phase phase)
-	{
-		state.setPhase(phase);
-		log.debug("setting state: " + state.toString());
-		panel.update(state);
-	}
-
 	private void initHotkeys()
 	{
-		hotkeys[0] = new HotkeyListener(() -> config.phaseSelection1Hotkey())
+		hotkeys.forEach(keyManager::unregisterKeyListener);
+		hotkeys.clear();
+
+		hotkeys.add(new HotkeyListener(() -> config.phaseSelection1Hotkey())
 		{
 			@Override
 			public void hotkeyPressed()
 			{
 				selectOption(0);
 			}
-		};
+		});
 
-		hotkeys[1] = new HotkeyListener(() -> config.phaseSelection2Hotkey())
+		hotkeys.add(new HotkeyListener(() -> config.phaseSelection2Hotkey())
 		{
 			@Override
 			public void hotkeyPressed()
 			{
 				selectOption(1);
 			}
-		};
+		});
 
-		hotkeys[2] = new HotkeyListener(() -> config.phaseSelection3Hotkey())
+		hotkeys.add(new HotkeyListener(() -> config.phaseSelection3Hotkey())
 		{
 			@Override
 			public void hotkeyPressed()
 			{
 				selectOption(2);
 			}
-		};
+		});
 
-		hotkeys[3] = new HotkeyListener(() -> config.nextPhaseHotkey())
+		hotkeys.add(new HotkeyListener(() -> config.nextPhaseHotkey())
 		{
 			@Override
 			public void hotkeyPressed()
 			{
-				setState(state.getRotationTree().get(state.getNumber()).get(0));
+				selectOption(0);
 			}
-		};
+		});
 
-		hotkeys[4] = new HotkeyListener(() -> config.resetPhasesHotkey())
+		hotkeys.add(new HotkeyListener(() -> config.resetPhasesHotkey())
 		{
 			@Override
 			public void hotkeyPressed()
 			{
 				reset();
 			}
-		};
+		});
 	}
 
 	private void toggleHotkeys()
 	{
-		for (HotkeyListener hotkey : hotkeys)
-		{
-			if (hotkeysEnabled)
-			{
-				keyManager.unregisterKeyListener(hotkey);
-			}
-			else
-			{
-				keyManager.registerKeyListener(hotkey);
-			}
-		}
+		hotkeys.forEach(hotkeysEnabled ? keyManager::unregisterKeyListener : keyManager::registerKeyListener);
 		hotkeysEnabled = !hotkeysEnabled;
 	}
 
