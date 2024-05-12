@@ -228,6 +228,12 @@ public class ZulrahHelperPlugin extends Plugin
 			return;
 		}
 
+		if (s.getValue().isReset())
+		{
+			reset();
+			return;
+		}
+
 		tree.setState(s);
 		rebuildPanel();
 	}

@@ -61,4 +61,6 @@ public class Step
 
 	@Builder.Default
 	ZulrahLocation spawn = ZulrahLocation.SOUTH;
+
+	boolean reset;
 }

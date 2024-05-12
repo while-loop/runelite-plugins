@@ -26,6 +26,7 @@
 package com.zulrahhelper.ui;
 
 import com.zulrahhelper.ZulrahHelperConfig;
+import com.zulrahhelper.ZulrahHelperPlugin;
 import com.zulrahhelper.tree.Step;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -39,6 +40,7 @@ public class Images
 	private static final BufferedImage SNAKELINGS = ImageUtil.loadImageResource(Step.class, "/options/snakeling2.png");
 	private static final BufferedImage HITSPLAT = ImageUtil.loadImageResource(Step.class, "/options/hitsplat.png");
 	private static final BufferedImage VENOM = ImageUtil.loadImageResource(Step.class, "/options/venom.png");
+	private static final BufferedImage RESET = ImageUtil.loadImageResource(ZulrahHelperPlugin.class, "/ui/reset_icon.png");;
 
 
 	private static final int WIDTH = 105;
@@ -107,6 +109,12 @@ public class Images
 			var c = config.darkMode() ? Color.WHITE : Color.BLACK;
 			var x = WIDTH - SNAKELINGS.getWidth() * 2 + PADDING * 2;
 			drawSplat(g, c, SNAKELINGS, step.getSnakelings() + "", x, x + PADDING);
+		}
+
+		if (step.isReset())
+		{
+			var p = 23;
+			g.drawImage(RESET, p, p, RESET.getWidth() * 3, RESET.getHeight() * 3, null);
 		}
 
 		g.dispose();
