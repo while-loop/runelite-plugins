@@ -96,6 +96,7 @@ public class ZulrahHelperPanel extends PluginPanel
 		reset.setToolTipText("Reset Zulrah rotation");
 		reset.setRolloverIcon(RESET_HOVER_ICON);
 		reset.addActionListener(l -> plugin.reset());
+		reset.setFocusable(false);
 
 		centerPanel.add(phasesView, BorderLayout.CENTER);
 
