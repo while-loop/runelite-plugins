@@ -26,6 +26,7 @@
 
 package com.zulrahhelper.ui;
 
+import com.google.common.base.Strings;
 import com.zulrahhelper.ZulrahHelperPlugin;
 import com.zulrahhelper.tree.PatternTree;
 import java.awt.BorderLayout;
@@ -42,7 +43,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
