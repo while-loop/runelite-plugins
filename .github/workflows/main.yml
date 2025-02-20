@@ -10,14 +10,6 @@ on:
     - cron: "* * * * *"
 
 jobs:
-  runewatch:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run a one-line script
-        run: |
-          git fetch origin runewatch && git checkout runewatch
-          bash scripts/update_watchlist.sh
   runewatch-updater:
     runs-on: ubuntu-latest
     steps:
