@@ -37,7 +37,7 @@ public interface ZulrahHelperConfig extends Config
 		name = "Prayer Icons",
 		description = "Set phase images to use prayer icons, " +
 			"denoting what overhead prayer to use per phase. " +
-			"no prayer icon means the phase is safe to turn overheads off.",
+			"No prayer icon means the phase is safe to turn overheads off.",
 		position = 0
 	)
 	default boolean displayPrayerIcons()
@@ -61,7 +61,7 @@ public interface ZulrahHelperConfig extends Config
 		keyName = ZulrahHelperPlugin.DISPLAY_VENOM_KEY,
 		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
 		name = "Venom Icons",
-		description = "Display number of venon attacks",
+		description = "Display number of venom attacks",
 		position = 1
 	)
 	default boolean displayVenom()
@@ -217,7 +217,7 @@ public interface ZulrahHelperConfig extends Config
 		keyName = "imageOrientation",
 		section = ZulrahHelperPlugin.SECTION_IMAGE_OPTIONS,
 		name = "Orientation",
-		description = "Rotate the phase images to the specified cardinal direction.",
+		description = "Rotate the phase images to the specified cardinal direction",
 		position = 9
 	)
 	default ImageOrientation imageOrientation()
