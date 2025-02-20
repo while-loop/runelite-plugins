@@ -356,7 +356,7 @@ public class RuneWatchPlugin extends Plugin {
             if (action == MenuAction.RUNELITE_PLAYER) {
                 // The player id is included in the event, so we can use that to get the player name,
                 // which avoids having to parse out the combat level and any icons preceding the name.
-                Player player = client.getCachedPlayers()[event.getId()];
+                Player player = client.getTopLevelWorldView().players().byIndex(event.getId());
                 if (player != null) {
                     target = player.getName();
                 } else {
@@ -370,7 +370,6 @@ public class RuneWatchPlugin extends Plugin {
                 caseManager.get(event.getMenuTarget(), (rwCase) -> alertPlayerWarning(target, true, AlertType.NONE));
             }
         }
-
     }
 
     @Subscribe
