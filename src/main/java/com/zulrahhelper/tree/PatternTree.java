@@ -205,7 +205,7 @@ public class PatternTree
 			.node()
 			.value(Step.builder()
 				.form(ZulrahForm.MAGE)
-				.attacks(2)
+				.attacks(5)
 				.prayer(Prayer.MAGIC)
 				.spawn(ZulrahLocation.EAST)
 				.point(StandLocation.NORTH)
