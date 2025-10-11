@@ -8,6 +8,7 @@ echo [INFO] Downloading RuneWatch mixedlist
 status_code=`curl \
       --max-time 15 \
       -w "%{http_code}" \
+      -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" \
       -H "Accept: application/json" \
       https://runewatch.com/api/cases/mixedlist \
       --output ${MIXEDLIST_FILE} 2> /dev/null`
