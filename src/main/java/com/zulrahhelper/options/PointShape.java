@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Ron Young <https://github.com/raiyni>
+ * Copyright (c) 2026, Ron Young <https://github.com/raiyni>
  * All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,41 @@
 package com.zulrahhelper.options;
 
 import java.awt.Color;
-import java.awt.Graphics;
-import lombok.RequiredArgsConstructor;
+import java.awt.Graphics2D;
 
-@RequiredArgsConstructor
-public enum StandLocation
+public enum PointShape
 {
+	X,
+	CIRCLE,
+	DIAMOND,
+	SQUARE;
 
-	START(19, 52),
-	START_MAGMA(11, 43),
-	PILLAR_1_SOUTH(20, 23),
-	PILLAR_1_WEST(18, 16),
-	PILLAR_1_NORTH(26, 9),
-	NORTH(41, 10),
-	PILLAR_2_SOUTH(62, 23),
-	PILLAR_2_EAST(63, 16),
-	PILLAR_2_NORTH(55, 9);
-
-	private static final int WIDTH = 6;
-	private static final int HEIGHT = 6;
-
-	private final int x;
-	private final int y;
-
-	public void drawX(Graphics g, int px, int py)
+	public void draw(Graphics2D g, int cx, int cy, int size, Color color)
 	{
-		var x = px + this.x - WIDTH / 2;
-		var y = py + this.y - HEIGHT / 2;
+		int half = size / 2;
+		g.setColor(color);
 
-		g.setColor(Color.WHITE);
-
-		g.drawLine(x, y, x + WIDTH, y + HEIGHT);
-		g.drawLine(x, y + HEIGHT, x + WIDTH, y);
-
-		g.drawLine(x - 1, y, x + WIDTH - 1, y + HEIGHT);
-		g.drawLine(x - 1, y + HEIGHT, x + WIDTH - 1, y);
+		switch (this)
+		{
+			case X:
+				g.drawLine(cx - half, cy - half, cx + half, cy + half);
+				g.drawLine(cx - half, cy + half, cx + half, cy - half);
+				// second offset pair for a thicker, more visible mark
+				g.drawLine(cx - half - 1, cy - half, cx + half - 1, cy + half);
+				g.drawLine(cx - half - 1, cy + half, cx + half - 1, cy - half);
+				break;
+			case CIRCLE:
+				g.fillOval(cx - half, cy - half, size, size);
+				break;
+			case DIAMOND:
+				g.fillPolygon(
+					new int[]{cx, cx + half, cx, cx - half},
+					new int[]{cy - half, cy, cy + half, cy},
+					4);
+				break;
+			case SQUARE:
+				g.fillRect(cx - half, cy - half, size, size);
+				break;
+		}
 	}
 }

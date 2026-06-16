@@ -23,43 +23,31 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.zulrahhelper.tree;
+package com.zulrahhelper.points;
 
-import com.zulrahhelper.options.Prayer;
-import com.zulrahhelper.options.ZulrahForm;
-import com.zulrahhelper.options.ZulrahLocation;
-import com.zulrahhelper.points.Point;
-import java.security.SecureRandom;
-import java.util.List;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Value
-@Builder(toBuilder = true)
-public class Step
+@RequiredArgsConstructor
+@Getter
+public enum StandLocation
 {
-	private static final SecureRandom RANDOM = new SecureRandom();
 
-	@Builder.Default
-	int id = RANDOM.nextInt();
+	START(19, 52),
+	START_MAGMA(11, 43),
+	MELEE_START_MAGMA(9, 47),
+	PILLAR_1_SOUTH(20, 23),
+	PILLAR_1_WEST(18, 16),
+	MELEE_PILLAR_1_WEST(9, 32),
+	PILLAR_1_NORTH(26, 9),
+	MELEE_PILLAR_1_NORTH(29, 5),
+	NORTH(41, 10),
+	PILLAR_2_SOUTH(62, 23),
+	PILLAR_2_EAST(63, 16),
+	MELEE_PILLAR_2_EAST(69, 30),
+	PILLAR_2_NORTH(55, 9),
+	MELEE_PILLAR_2_NORTH(49, 5);
 
-	String title;
-
-	int attacks;
-	int venom;
-	int snakelings;
-
-	ZulrahForm form;
-
-	@Singular
-	List<Point> points;
-
-	@Singular
-	List<Prayer> prayers;
-
-	@Builder.Default
-	ZulrahLocation spawn = ZulrahLocation.SOUTH;
-
-	boolean reset;
+	private final int x;
+	private final int y;
 }
