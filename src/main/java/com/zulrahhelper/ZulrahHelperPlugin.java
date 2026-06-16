@@ -36,6 +36,9 @@ public class ZulrahHelperPlugin extends Plugin
 {
 	static final String CONFIG_GROUP = "zulrahhelper";
 	static final String SECTION_IMAGE_OPTIONS = "Image Options";
+	static final String SECTION_PLAYER_MARKERS = "Player Markers";
+	static final String SECTION_FORM_COLORS = "Form Colors";
+	static final String SECTION_PHASE_OVERLAYS = "Phase Overlays";
 	static final String SECTION_HOTKEYS = "Hotkeys";
 	static final String SECTION_MISC = "Miscellaneous";
 
@@ -50,6 +53,13 @@ public class ZulrahHelperPlugin extends Plugin
 	static final String MAGE_COLOR_KEY = "mageColor";
 	static final String RANGE_COLOR_KEY = "rangeColor";
 	static final String MELEE_COLOR_KEY = "meleeColor";
+	static final String STRATEGY_KEY = "strategy";
+	static final String DISPLAY_MOVEMENT_PATHS_KEY = "displayMovementPaths";
+	static final String RANGE_POINT_COLOR_KEY = "rangePointColor";
+	static final String MELEE_POINT_COLOR_KEY = "meleePointColor";
+	static final String RANGE_POINT_SHAPE_KEY = "rangePointShape";
+	static final String MELEE_POINT_SHAPE_KEY = "meleePointShape";
+	static final String POINT_SIZE_KEY = "pointSize";
 
 
 	private static final int ZULANDRA_REGION_ID = 8751;
@@ -66,7 +76,14 @@ public class ZulrahHelperPlugin extends Plugin
 		DISPLAY_SNAKELINGS_KEY,
 		MAGE_COLOR_KEY,
 		MELEE_COLOR_KEY,
-		RANGE_COLOR_KEY
+		RANGE_COLOR_KEY,
+		STRATEGY_KEY,
+		DISPLAY_MOVEMENT_PATHS_KEY,
+		RANGE_POINT_COLOR_KEY,
+		MELEE_POINT_COLOR_KEY,
+		RANGE_POINT_SHAPE_KEY,
+		MELEE_POINT_SHAPE_KEY,
+		POINT_SIZE_KEY
 	);
 
 	@Inject

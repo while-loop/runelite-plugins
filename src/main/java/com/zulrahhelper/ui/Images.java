@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Ron Young <https://github.com/raiyni>
+ * Copyright (c) 2026, Ron Young <https://github.com/raiyni>
  * All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,7 @@ public class Images
 	private static final BufferedImage SNAKELINGS = ImageUtil.loadImageResource(Step.class, "/options/snakeling2.png");
 	private static final BufferedImage HITSPLAT = ImageUtil.loadImageResource(Step.class, "/options/hitsplat.png");
 	private static final BufferedImage VENOM = ImageUtil.loadImageResource(Step.class, "/options/venom.png");
-	private static final BufferedImage RESET = ImageUtil.loadImageResource(ZulrahHelperPlugin.class, "/ui/reset_icon.png");;
-
+	private static final BufferedImage RESET = ImageUtil.loadImageResource(ZulrahHelperPlugin.class, "/ui/reset_icon.png");
 
 	private static final int WIDTH = 105;
 	private static final int HEIGHT = 105;
@@ -64,13 +63,16 @@ public class Images
 
 		g.drawImage(FLOOR_IMG, null, px, py);
 
-		for (var p : step.getPoints())
+		for (var point : step.getPoints())
 		{
-			p.drawX(g, px, py);
+			point.draw(g, px, py, config);
 		}
 
 		var spawn = step.getSpawn();
-		spawn.drawLocation(g, step.getForm().getColor(config), px, py);
+		if (spawn != null && step.getForm() != null)
+		{
+			spawn.drawLocation(g, step.getForm().getColor(config), px, py);
+		}
 
 		var theta = config.imageOrientation().getRotation();
 		if (theta != 0)

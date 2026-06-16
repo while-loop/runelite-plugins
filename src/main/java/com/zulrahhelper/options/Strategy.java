@@ -23,43 +23,67 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.zulrahhelper.tree;
+package com.zulrahhelper.options;
 
-import com.zulrahhelper.options.Prayer;
-import com.zulrahhelper.options.ZulrahForm;
-import com.zulrahhelper.options.ZulrahLocation;
-import com.zulrahhelper.points.Point;
-import java.security.SecureRandom;
-import java.util.List;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import com.zulrahhelper.ZulrahHelperConfig;
+import java.awt.Color;
 
-@Value
-@Builder(toBuilder = true)
-public class Step
+public enum Strategy
 {
-	private static final SecureRandom RANDOM = new SecureRandom();
+	MELEE_ONLY("Melee only"),
+//	RANGE_ONLY("Zulrah Range mode only"),
+	RANGE_MAGE("Range/Mage"),
+//	TRIBRID_MELEE("Tribrid melee optimized"),
+	;
 
-	@Builder.Default
-	int id = RANDOM.nextInt();
+	private final String displayName;
 
-	String title;
+	Strategy(String displayName)
+	{
+		this.displayName = displayName;
+	}
 
-	int attacks;
-	int venom;
-	int snakelings;
+	@Override
+	public String toString()
+	{
+		return displayName;
+	}
 
-	ZulrahForm form;
+	public boolean isVisible(Strategy pointMode)
+	{
+		switch (this)
+		{
+			case MELEE_ONLY:
+				return pointMode == MELEE_ONLY;
+//			case RANGE_ONLY:
+			case RANGE_MAGE:
+				return pointMode == RANGE_MAGE;
+//			case TRIBRID_MELEE:
+//				return true;
+			default:
+				return true;
+		}
+	}
 
-	@Singular
-	List<Point> points;
+	public Color getColor(ZulrahHelperConfig config)
+	{
+		switch (this)
+		{
+			case MELEE_ONLY:
+				return config.meleePointColor();
+			default:
+				return config.rangePointColor();
+		}
+	}
 
-	@Singular
-	List<Prayer> prayers;
-
-	@Builder.Default
-	ZulrahLocation spawn = ZulrahLocation.SOUTH;
-
-	boolean reset;
+	public PointShape getShape(ZulrahHelperConfig config)
+	{
+		switch (this)
+		{
+			case MELEE_ONLY:
+				return config.meleePointShape();
+			default:
+				return config.rangePointShape();
+		}
+	}
 }

@@ -23,43 +23,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.zulrahhelper.tree;
+package com.zulrahhelper.points;
 
-import com.zulrahhelper.options.Prayer;
-import com.zulrahhelper.options.ZulrahForm;
-import com.zulrahhelper.options.ZulrahLocation;
-import com.zulrahhelper.points.Point;
-import java.security.SecureRandom;
-import java.util.List;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
+import com.zulrahhelper.ZulrahHelperConfig;
+import com.zulrahhelper.options.Strategy;
+import java.awt.Graphics2D;
 
-@Value
-@Builder(toBuilder = true)
-public class Step
+public class SinglePoint implements Point
 {
-	private static final SecureRandom RANDOM = new SecureRandom();
+	private final StandLocation position;
+	private final Strategy mode;
 
-	@Builder.Default
-	int id = RANDOM.nextInt();
+	SinglePoint(StandLocation position, Strategy mode)
+	{
+		this.position = position;
+		this.mode = mode;
+	}
 
-	String title;
+	@Override
+	public Strategy getMode()
+	{
+		return mode;
+	}
 
-	int attacks;
-	int venom;
-	int snakelings;
+	@Override
+	public void draw(Graphics2D g, int px, int py, ZulrahHelperConfig config)
+	{
+		if (!config.strategy().isVisible(mode))
+		{
+			return;
+		}
 
-	ZulrahForm form;
-
-	@Singular
-	List<Point> points;
-
-	@Singular
-	List<Prayer> prayers;
-
-	@Builder.Default
-	ZulrahLocation spawn = ZulrahLocation.SOUTH;
-
-	boolean reset;
+		Point.drawShape(g, position, px, py, mode, config);
+	}
 }
