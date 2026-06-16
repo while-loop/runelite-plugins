@@ -9,3 +9,4 @@ nb-configuration.xml
 nbproject/
 .DS_Store
 out/
+bin
