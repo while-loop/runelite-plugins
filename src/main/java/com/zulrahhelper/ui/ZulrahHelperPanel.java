@@ -31,6 +31,7 @@ import com.zulrahhelper.ZulrahHelperPlugin;
 import com.zulrahhelper.tree.PatternTree;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -38,6 +39,7 @@ import java.awt.image.BufferedImage;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -67,6 +69,7 @@ public class ZulrahHelperPanel extends PluginPanel
 	private final PatternTree tree;
 
 	private final JPanel phasesView = new JPanel(new GridBagLayout());
+	private JLabel strategyLabel;
 
 	@Inject
 	ZulrahHelperPanel(ZulrahHelperPlugin plugin, PatternTree tree)
@@ -80,11 +83,23 @@ public class ZulrahHelperPanel extends PluginPanel
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.setBorder(new EmptyBorder(1, 0, 10, 0));
 
-		JLabel title = new JLabel();
-		title.setText("Zulrah Helper");
-		title.setForeground(Color.WHITE);
+		JPanel titlePanel = new JPanel();
+		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
+		titlePanel.setOpaque(false);
 
-		northPanel.add(title, BorderLayout.WEST);
+		JLabel title = new JLabel("Zulrah Helper");
+		title.setForeground(Color.WHITE);
+		title.setAlignmentY(Component.CENTER_ALIGNMENT);
+
+		strategyLabel = new JLabel();
+		strategyLabel.setForeground(Color.GRAY);
+		strategyLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
+
+		titlePanel.add(title);
+		titlePanel.add(Box.createRigidArea(new Dimension(6, 0)));
+		titlePanel.add(strategyLabel);
+
+		northPanel.add(titlePanel, BorderLayout.WEST);
 		JButton reset = new JButton(RESET_ICON);
 		northPanel.add(reset, BorderLayout.EAST);
 
@@ -108,6 +123,8 @@ public class ZulrahHelperPanel extends PluginPanel
 
 	public void rebuildPanel()
 	{
+		strategyLabel.setText(plugin.getConfig().strategy().toString());
+
 		SwingUtil.fastRemoveAll(phasesView);
 
 		GridBagConstraints constraints = new GridBagConstraints();
