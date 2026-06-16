@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Ron Young <https://github.com/raiyni>
+ * Copyright (c) 2026, Ron Young <https://github.com/raiyni>
  * All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,11 @@
 package com.zulrahhelper;
 
 import com.zulrahhelper.options.Prayer;
-import com.zulrahhelper.options.StandLocation;
+import com.zulrahhelper.options.Strategy;
 import com.zulrahhelper.options.ZulrahForm;
 import com.zulrahhelper.options.ZulrahLocation;
+import static com.zulrahhelper.points.Point.stand;
+import com.zulrahhelper.points.StandLocation;
 import com.zulrahhelper.tree.Node;
 import com.zulrahhelper.tree.Step;
 import com.zulrahhelper.ui.Images;
@@ -40,13 +42,23 @@ import lombok.extern.slf4j.Slf4j;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 public class ImageBuilderTest
 {
 	private ZulrahHelperConfig getConfig()
 	{
-		return spy(ZulrahHelperConfig.class);
+		var config = spy(ZulrahHelperConfig.class);
+		when(config.strategy()).thenReturn(Strategy.RANGE_MAGE);
+		return config;
+	}
+
+	private ZulrahHelperConfig getMeleeConfig()
+	{
+		var config = spy(ZulrahHelperConfig.class);
+		when(config.strategy()).thenReturn(Strategy.MELEE_ONLY);
+		return config;
 	}
 
 	@Test
@@ -54,7 +66,7 @@ public class ImageBuilderTest
 	{
 		var root = Node.builder()
 			.value(Step.builder()
-				.point(StandLocation.START)
+				.point(stand(StandLocation.START))
 				.form(ZulrahForm.RANGE)
 				.attacks(5)
 				.venom(4)
@@ -62,15 +74,15 @@ public class ImageBuilderTest
 			.node()
 			.value(Step.builder()
 				.form(ZulrahForm.MELEE)
-				.point(StandLocation.START)
-				.point(StandLocation.START_MAGMA)
+				.point(stand(StandLocation.START))
+				.point(stand(StandLocation.START_MAGMA))
 				.attacks(2)
 				.build())
 			.node()
 			.value(Step.builder()
 				.form(ZulrahForm.MAGE)
-				.point(StandLocation.START)
-				.point(StandLocation.START_MAGMA)
+				.point(stand(StandLocation.START))
+				.point(stand(StandLocation.START_MAGMA))
 				.attacks(4)
 				.build())
 			.buildUp();
@@ -86,7 +98,7 @@ public class ImageBuilderTest
 	{
 		var root = Node.builder()
 			.value(Step.builder()
-				.point(StandLocation.START)
+				.point(stand(StandLocation.START))
 				.form(ZulrahForm.RANGE)
 				.attacks(5)
 				.venom(4)
@@ -94,8 +106,8 @@ public class ImageBuilderTest
 			.child(Node.builder()
 				.value(Step.builder()
 					.form(ZulrahForm.MELEE)
-					.point(StandLocation.START)
-					.point(StandLocation.START_MAGMA)
+					.point(stand(StandLocation.START))
+					.point(stand(StandLocation.START_MAGMA))
 					.attacks(2)
 					.build())
 				.build())
@@ -110,8 +122,8 @@ public class ImageBuilderTest
 	public void simpleStep() throws IOException
 	{
 		Step step = Step.builder()
-			.point(StandLocation.START)
-			.point(StandLocation.START_MAGMA)
+			.point(stand(StandLocation.START))
+			.point(stand(StandLocation.START_MAGMA))
 			.spawn(ZulrahLocation.NORTH)
 			.prayer(Prayer.MAGIC)
 			.prayer(Prayer.RANGE)
@@ -121,7 +133,7 @@ public class ImageBuilderTest
 			.venom(3)
 			.build();
 
-		assertEquals(StandLocation.START, step.getPoints().get(0));
+		assertEquals(Strategy.RANGE_MAGE, step.getPoints().get(0).getMode());
 		assertEquals(ZulrahLocation.NORTH, step.getSpawn());
 		assertEquals(2, step.getPrayers().size());
 		assertEquals(Prayer.MAGIC, step.getPrayers().get(0));
@@ -138,7 +150,7 @@ public class ImageBuilderTest
 		for (var loc : ZulrahLocation.values())
 		{
 			Step step = Step.builder()
-				.point(StandLocation.START)
+				.point(stand(StandLocation.START))
 				.spawn(loc)
 				.build();
 
@@ -155,7 +167,7 @@ public class ImageBuilderTest
 		for (var loc : StandLocation.values())
 		{
 			Step step = Step.builder()
-				.point(loc)
+				.point(stand(loc))
 				.prayer(Prayer.MAGIC)
 				.build();
 

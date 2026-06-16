@@ -23,43 +23,63 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.zulrahhelper.tree;
+package com.zulrahhelper.points;
 
-import com.zulrahhelper.options.Prayer;
-import com.zulrahhelper.options.ZulrahForm;
-import com.zulrahhelper.options.ZulrahLocation;
-import com.zulrahhelper.points.Point;
-import java.security.SecureRandom;
+import com.zulrahhelper.ZulrahHelperConfig;
+import com.zulrahhelper.options.Strategy;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.List;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.Value;
 
-@Value
-@Builder(toBuilder = true)
-public class Step
+public class Path implements Point
 {
-	private static final SecureRandom RANDOM = new SecureRandom();
+	private final Strategy mode;
+	private final List<StandLocation> positions = new ArrayList<>();
 
-	@Builder.Default
-	int id = RANDOM.nextInt();
+	Path(Strategy mode)
+	{
+		this.mode = mode;
+	}
 
-	String title;
+	public Path at(StandLocation pos)
+	{
+		positions.add(pos);
+		return this;
+	}
 
-	int attacks;
-	int venom;
-	int snakelings;
+	public Path to(StandLocation pos)
+	{
+		positions.add(pos);
+		return this;
+	}
 
-	ZulrahForm form;
+	@Override
+	public Strategy getMode()
+	{
+		return mode;
+	}
 
-	@Singular
-	List<Point> points;
+	@Override
+	public void draw(Graphics2D g, int px, int py, ZulrahHelperConfig config)
+	{
+		if (!config.strategy().isVisible(mode))
+		{
+			return;
+		}
 
-	@Singular
-	List<Prayer> prayers;
+		for (StandLocation pos : positions)
+		{
+			Point.drawShape(g, pos, px, py, mode, config);
+		}
 
-	@Builder.Default
-	ZulrahLocation spawn = ZulrahLocation.SOUTH;
-
-	boolean reset;
+		if (config.displayMovementPaths() && positions.size() > 1)
+		{
+			for (int i = 0; i < positions.size() - 1; i++)
+			{
+				Arrows.drawArrow(g,
+					px + positions.get(i).getX(), py + positions.get(i).getY(),
+					px + positions.get(i + 1).getX(), py + positions.get(i + 1).getY());
+			}
+		}
+	}
 }
